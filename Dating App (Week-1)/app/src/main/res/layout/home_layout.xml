@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F44336"
+    tools:context=".HomeActivity">
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/welcome_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="take your pick ;)"
+        android:textSize="48sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold|italic"
+        android:fontFamily="cursive"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- ICON ROW (CHAIN STARTS HERE) -->
+
+    <ImageView
+        android:id="@+id/icon1_id"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/icon_1"
+        app:layout_constraintEnd_toStartOf="@id/icon2_id"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/icon2_id"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/icon_2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon1_id"
+        app:layout_constraintEnd_toStartOf="@id/icon3_id"/>
+
+    <ImageView
+        android:id="@+id/icon3_id"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/icon_3"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon2_id"
+        app:layout_constraintEnd_toStartOf="@id/icon4_id"/>
+
+    <ImageView
+        android:id="@+id/icon4_id"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/icon_4"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/icon3_id"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- MAIN IMAGE -->
+    <ImageView
+        android:id="@+id/image_id"
+        android:layout_width="0dp"
+        android:layout_height="400dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/icon_1"
+        app:layout_constraintTop_toBottomOf="@id/icon1_id"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- NAME -->
+    <TextView
+        android:id="@+id/name_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="cursive"
+        android:text="Name Here"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/image_id" />
+
+    <!-- DETAIL -->
+    <TextView
+        android:id="@+id/detail_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="27 F"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/name_id"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- DESCRIPTION -->
+    <TextView
+        android:id="@+id/description_id"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="Description here..."
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/detail_id" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
