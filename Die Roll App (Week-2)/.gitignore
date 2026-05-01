@@ -1,0 +1,39 @@
+# Gradle files
+.gradle/
+**/build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log files
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Android Studio generated files and folders
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+.navigation/
+
+# Build outputs
+*.apk
+*.aab
+output-metadata.json
+
+# Java/Kotlin
+*.class
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (decide if you want this ignored)
+google-services.json
+
+# Android Profiling
+*.hprof

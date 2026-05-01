@@ -8,6 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import android.view.MotionEvent
+import android.view.animation.OvershootInterpolator
 
 // activity ~ page ~ scene/level
 class HomeActivity : AppCompatActivity()
@@ -32,6 +34,56 @@ class HomeActivity : AppCompatActivity()
         val iconView3: ImageView = findViewById<ImageView>(R.id.icon3_id)
         val iconView4: ImageView = findViewById<ImageView>(R.id.icon4_id)
 
+        val ids = listOf(
+            R.id.icon1_id,
+            R.id.icon2_id,
+            R.id.icon3_id,
+            R.id.icon4_id
+        )
+
+        for (id in ids) {
+            val v: View = findViewById(id)
+
+            v.setOnTouchListener { view, event ->
+                when (event.action) {
+
+                    MotionEvent.ACTION_DOWN -> {
+                        view.animate()
+                            .scaleX(0.92f)
+                            .scaleY(0.92f)
+                            .setDuration(100)
+                            .start()
+
+                        view.alpha = 0.7f
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        view.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(150)
+                            .setInterpolator(OvershootInterpolator())
+                            .start()
+
+                        view.alpha = 1f
+                        view.performClick()
+                    }
+
+                    MotionEvent.ACTION_CANCEL -> {
+                        view.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(150)
+                            .setInterpolator(OvershootInterpolator())
+                            .start()
+
+                        view.alpha = 1f
+                    }
+                }
+                true
+            }
+        }
+
         val imageView: ImageView = findViewById<ImageView>(R.id.image_id)
         imageView.visibility = View.GONE
 
@@ -45,7 +97,7 @@ class HomeActivity : AppCompatActivity()
             descriptionTextView.visibility = View.VISIBLE
 
             nameTextView.text = "Lara Croft"
-            detailTextView.text = "27 F"
+            detailTextView.text = "24 F"
             descriptionTextView.text = "Archaeologist. Adventurer. Occasional tomb trespasser (for science). I’ve got a PhD in ancient civilizations and a minor in narrowly escaping death traps. I travel a lot—if you’re into spontaneous trips to remote jungles or crumbling ruins, we’ll get along great."
         }
 
@@ -59,7 +111,7 @@ class HomeActivity : AppCompatActivity()
             descriptionTextView.visibility = View.VISIBLE
 
             nameTextView.text = "Samus Aran"
-            detailTextView.text = "27 F"
+            detailTextView.text = "32 F"
             descriptionTextView.text = "Looking for someone who respects personal space (a lot of it), isn’t intimidated by a woman with an arm cannon, and can handle long-distance—like, really long distance. Bonus if you’re cool with the occasional alien encounter and don’t ask too many questions about my past."
         }
 
@@ -87,7 +139,7 @@ class HomeActivity : AppCompatActivity()
             descriptionTextView.visibility = View.VISIBLE
 
             nameTextView.text = "Jill Valentine"
-            detailTextView.text = "27 F"
+            detailTextView.text = "29 F"
             descriptionTextView.text = "Looking for someone who can stay calm when things go sideways, doesn’t scare easy, and won’t ask why I always check every corner twice. Bonus points if you can mix a decent cocktail—we might need it after surviving the night."
         }
     }
