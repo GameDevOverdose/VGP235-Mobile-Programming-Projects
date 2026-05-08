@@ -20,10 +20,50 @@
         app:layout_constraintVertical_bias="0.924" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/interestAvatar_id"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="35dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/avatar_1" />
+
+    <TextView
+        android:id="@+id/interestName_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/avatar_1"
-        tools:layout_editor_absoluteX="-16dp" />
+        android:layout_marginTop="20dp"
+        android:text="Name"
+        app:layout_constraintEnd_toEndOf="@+id/interestAvatar_id"
+        app:layout_constraintStart_toStartOf="@+id/interestAvatar_id"
+        app:layout_constraintTop_toBottomOf="@+id/interestAvatar_id" />
+
+    <TextView
+        android:id="@+id/interestAge_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:text="Age"
+        app:layout_constraintStart_toEndOf="@+id/interestAvatar_id"
+        app:layout_constraintTop_toTopOf="@+id/interestAvatar_id" />
+
+    <TextView
+        android:id="@+id/interestWeight_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Weight"
+        app:layout_constraintStart_toEndOf="@+id/interestAvatar_id"
+        app:layout_constraintTop_toBottomOf="@+id/interestAge_id" />
+
+    <TextView
+        android:id="@+id/matchText_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="200dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

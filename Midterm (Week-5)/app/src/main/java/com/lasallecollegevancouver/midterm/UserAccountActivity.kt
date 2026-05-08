@@ -55,6 +55,16 @@ class UserAccountActivity : AppCompatActivity() {
         val hairColorText: EditText = findViewById<EditText>(R.id.hairColorText_id)
         val bodyTypeText: EditText = findViewById<EditText>(R.id.bodyTypeText_id)
 
+        nameText.setText(HomeActivity.name ?: "")
+        occupationText.setText(HomeActivity.occupation ?: "")
+
+        if(HomeActivity.height != 0.0f) heightText.setText(HomeActivity.height.toString())
+        if(HomeActivity.weight != 0.0f) weightText.setText(HomeActivity.weight.toString())
+
+        eyeColorText.setText(HomeActivity.eyeColor ?: "")
+        hairColorText.setText(HomeActivity.hairColor ?: "")
+        bodyTypeText.setText(HomeActivity.bodyType ?: "")
+
         saveButton.setOnClickListener {
 
             HomeActivity.name = nameText.text.toString()
