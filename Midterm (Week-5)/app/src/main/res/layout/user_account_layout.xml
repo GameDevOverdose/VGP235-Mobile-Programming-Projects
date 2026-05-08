@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UserAccountActivity">
+
+    <TextView
+        android:id="@+id/user_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:fontFamily="@font/outfit_light"
+        android:text="User Settings"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/saveButton_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.924" />
+
+    <ImageView
+        android:id="@+id/avatarImageView1_id"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toStartOf="@+id/avatarImageView2_id"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_id"
+        app:srcCompat="@drawable/avatar_1" />
+
+    <ImageView
+        android:id="@+id/avatarImageView2_id"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toStartOf="@+id/avatarImageView3_id"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/avatarImageView1_id"
+        app:layout_constraintTop_toBottomOf="@+id/user_id"
+        app:srcCompat="@drawable/avatar_2" />
+
+    <ImageView
+        android:id="@+id/avatarImageView3_id"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toStartOf="@+id/avatarImageView4_id"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/avatarImageView2_id"
+        app:layout_constraintTop_toBottomOf="@+id/user_id"
+        app:srcCompat="@drawable/avatar_3" />
+
+    <ImageView
+        android:id="@+id/avatarImageView4_id"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toStartOf="@+id/avatarImageView5_id"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/avatarImageView3_id"
+        app:layout_constraintTop_toBottomOf="@+id/user_id"
+        app:srcCompat="@drawable/avatar_4" />
+
+    <ImageView
+        android:id="@+id/avatarImageView5_id"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/avatarImageView4_id"
+        app:layout_constraintTop_toBottomOf="@+id/user_id"
+        app:srcCompat="@drawable/avatar_5" />
+
+    <EditText
+        android:id="@+id/nameText_id"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:ems="10"
+        android:hint="Name"
+        android:inputType="text"
+        app:layout_constraintEnd_toStartOf="@+id/occupationText_id"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/avatarImageView3_id" />
+
+    <EditText
+        android:id="@+id/occupationText_id"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:ems="10"
+        android:hint="Occupation"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/nameText_id"
+        app:layout_constraintTop_toBottomOf="@+id/avatarImageView3_id" />
+
+    <EditText
+        android:id="@+id/heightText_id"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:ems="10"
+        android:hint="Height"
+        android:inputType="text"
+        app:layout_constraintEnd_toStartOf="@+id/weightText_id"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/avatarImageView3_id" />
+
+    <EditText
+        android:id="@+id/eyeColorText_id"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:ems="10"
+        android:hint="Eye Color"
+        android:inputType="text"
+        app:layout_constraintEnd_toStartOf="@+id/hairColorText_id"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/heightText_id" />
+
+    <EditText
+        android:id="@+id/hairColorText_id"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:ems="10"
+        android:hint="Hair Color"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/eyeColorText_id"
+        app:layout_constraintTop_toBottomOf="@+id/heightText_id" />
+
+    <EditText
+        android:id="@+id/bodyTypeText_id"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:ems="10"
+        android:hint="Body Type"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eyeColorText_id" />
+
+    <EditText
+        android:id="@+id/weightText_id"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:ems="10"
+        android:hint="Weight"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/heightText_id"
+        app:layout_constraintTop_toBottomOf="@+id/avatarImageView3_id" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

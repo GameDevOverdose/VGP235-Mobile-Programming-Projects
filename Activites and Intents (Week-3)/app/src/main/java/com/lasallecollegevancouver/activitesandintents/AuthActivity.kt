@@ -16,7 +16,7 @@ class AuthActivity : AppCompatActivity() {
         val backButton = findViewById<Button>(R.id.backButton_id)
         val textView = findViewById<TextView>(R.id.textView_id)
 
-        textView.text = intent.getStringExtra("key")
+        textView.text = intent.getStringExtra("key") ?: ""
 
         backButton.setOnClickListener {
             finish()
