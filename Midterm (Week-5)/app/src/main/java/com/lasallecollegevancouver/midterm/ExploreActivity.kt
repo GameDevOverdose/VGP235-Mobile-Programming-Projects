@@ -1,14 +1,10 @@
 package com.lasallecollegevancouver.midterm
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import org.w3c.dom.Text
 
 class ExploreActivity : AppCompatActivity() {
 
@@ -78,6 +74,11 @@ class ExploreActivity : AppCompatActivity() {
         val nameTextView: TextView = findViewById<TextView>(R.id.interestName_id)
         val ageTextView: TextView = findViewById<TextView>(R.id.interestAge_id)
         val weightTextView: TextView = findViewById<TextView>(R.id.interestWeight_id)
+        val heightTextView: TextView = findViewById<TextView>(R.id.interestHeight_id)
+        val eyeColorTextView: TextView = findViewById<TextView>(R.id.interestEyeColor_id)
+        val hairColorTextView: TextView = findViewById<TextView>(R.id.interestHairColor_id)
+        val occupationView: TextView = findViewById<TextView>(R.id.interestOccupationColor_id)
+        val bodyTypeView: TextView = findViewById<TextView>(R.id.interestBodyTypeColor_id)
         val matchTextView: TextView = findViewById<TextView>(R.id.matchText_id)
 
         val avatar: Int = avatarDrawables.random()
@@ -95,7 +96,12 @@ class ExploreActivity : AppCompatActivity() {
         avatarImageView.setImageResource(avatar)
         nameTextView.text = name
         ageTextView.text = age.toString()
+        heightTextView.text = height.toString()
         weightTextView.text = weight.toString()
+        eyeColorTextView.text = eyeColor.toString()
+        hairColorTextView.text = hairColor.toString()
+        occupationView.text = occupation.toString()
+        bodyTypeView.text = bodyType.toString()
 
         ///////////////////////////////////////////////////////////////////
 

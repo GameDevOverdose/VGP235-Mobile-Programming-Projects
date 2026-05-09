@@ -7,11 +7,26 @@
     android:layout_height="match_parent"
     tools:context=".ExploreActivity">
 
+    <ImageView
+        android:id="@+id/background_id3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/bg" />
+
     <TextView
         android:id="@+id/homeButton_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/outfit"
         android:text="Home"
+        android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -21,10 +36,10 @@
 
     <ImageView
         android:id="@+id/interestAvatar_id"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="35dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/avatar_1" />
@@ -33,37 +48,112 @@
         android:id="@+id/interestName_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="100dp"
         android:text="Name"
-        app:layout_constraintEnd_toEndOf="@+id/interestAvatar_id"
-        app:layout_constraintStart_toStartOf="@+id/interestAvatar_id"
-        app:layout_constraintTop_toBottomOf="@+id/interestAvatar_id" />
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/background_id3"
+        app:layout_constraintTop_toTopOf="@+id/background_id3" />
 
     <TextView
         android:id="@+id/interestAge_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
         android:text="Age"
-        app:layout_constraintStart_toEndOf="@+id/interestAvatar_id"
-        app:layout_constraintTop_toTopOf="@+id/interestAvatar_id" />
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/background_id3"
+        app:layout_constraintTop_toBottomOf="@+id/interestName_id" />
+
+    <TextView
+        android:id="@+id/interestHeight_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Weight"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/background_id3"
+        app:layout_constraintTop_toBottomOf="@+id/interestAge_id" />
 
     <TextView
         android:id="@+id/interestWeight_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="10dp"
-        android:text="Weight"
-        app:layout_constraintStart_toEndOf="@+id/interestAvatar_id"
-        app:layout_constraintTop_toBottomOf="@+id/interestAge_id" />
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Height"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/background_id3"
+        app:layout_constraintTop_toBottomOf="@+id/interestHeight_id" />
+
+    <TextView
+        android:id="@+id/interestEyeColor_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="20dp"
+        android:text="Eye Color"
+        android:textAlignment="textEnd"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/background_id3" />
+
+    <TextView
+        android:id="@+id/interestHairColor_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:text="Hair Color"
+        android:textAlignment="textEnd"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/interestEyeColor_id" />
+
+    <TextView
+        android:id="@+id/interestOccupationColor_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:text="Occupation"
+        android:textAlignment="textEnd"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/interestHairColor_id" />
+
+    <TextView
+        android:id="@+id/interestBodyTypeColor_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="20dp"
+        android:text="Body Type"
+        android:textAlignment="textEnd"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/interestOccupationColor_id" />
 
     <TextView
         android:id="@+id/matchText_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="200dp"
+        android:fontFamily="@font/outfit_light"
+        android:textColor="#FFFFFF"
+        android:textSize="34sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

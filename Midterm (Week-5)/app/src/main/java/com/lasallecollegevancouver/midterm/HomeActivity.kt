@@ -12,12 +12,13 @@ class HomeActivity : AppCompatActivity() {
 
     lateinit var nameTextView: TextView
     lateinit var avatarImageView: ImageView
+    lateinit var occupationTextView: TextView
 
     companion object
     {
         var name: String = ""
         var occupation: String = ""
-        var avatarResId: Int = R.drawable.avatar_1
+        var avatarResId: Int = R.drawable.default_avatar
 
         // height, weight, age, eye color, hair color, body type
 
@@ -33,14 +34,18 @@ class HomeActivity : AppCompatActivity() {
 
     fun LoadUserData()
     {
-        nameTextView.text = name
         avatarImageView.setImageResource(avatarResId)
+        nameTextView.text = name
+        occupationTextView.text = occupation
     }
 
     override fun onResume() {
         super.onResume()
 
-        LoadUserData()
+        if(avatarResId != R.drawable.default_avatar)
+        {
+            LoadUserData()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,16 +54,21 @@ class HomeActivity : AppCompatActivity() {
         setContentView(R.layout.home_layout)
 
         val exploreButton: TextView = findViewById<TextView>(R.id.exploreButton_id)
-        val userButton: TextView = findViewById<TextView>(R.id.userButton_id)
+        val userButton: ImageView = findViewById<ImageView>(R.id.avatar_id)
 
-        nameTextView = findViewById<TextView>(R.id.name_id)
         avatarImageView = findViewById<ImageView>(R.id.avatar_id)
+        nameTextView = findViewById<TextView>(R.id.name_id)
+        occupationTextView = findViewById<TextView>(R.id.occupation_id)
 
         LoadUserData()
 
         exploreButton.setOnClickListener {
             val intent = Intent(this, ExploreActivity::class.java)
-            startActivity(intent)
+
+            if(avatarResId != R.drawable.default_avatar)
+            {
+                startActivity(intent)
+            }
         }
 
         userButton.setOnClickListener {
