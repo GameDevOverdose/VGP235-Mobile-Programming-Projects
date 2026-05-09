@@ -14,7 +14,7 @@ The idea for the midterm was on paper quite simple, a pseudo dating/discovery ap
 
 | Home | User Settings | Discovery |
 |---|---|---|
-| <img src="https://github.com/user-attachments/assets/daa272b7-eb7e-4fe4-945b-f61978ce9a24" width="200"/> | <img src="https://github.com/user-attachments/assets/914a0f04-65a2-4fa4-9a12-e314ee17dc89" width="200"/> | <img src="https://github.com/user-attachments/assets/7864ce0d-ccb0-4c26-b061-0b0124ed8793" width="200"/> |
+| <img src="https://github.com/user-attachments/assets/daa272b7-eb7e-4fe4-945b-f61978ce9a24" width="250"/> | <img src="https://github.com/user-attachments/assets/914a0f04-65a2-4fa4-9a12-e314ee17dc89" width="250"/> | <img src="https://github.com/user-attachments/assets/7864ce0d-ccb0-4c26-b061-0b0124ed8793" width="250"/> |
 
 While hectic, the app still somehow came together towards the end, which even though it's pretty simple, still was somewhat off a relief to pull off considering 3 of the 4 hours were mostly spent setting up the code and dealing with the emulator, as well as the slightly clunky and painfully slow layout editors leaving only an hour for the design and the look of the UI.
 
