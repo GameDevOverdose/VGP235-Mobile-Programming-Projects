@@ -26,3 +26,7 @@ While hectic, the app still somehow came together towards the end, which even th
 - A nice to have, would be the match system hinting and displaying what factors led it to come to the conclusion that it did.
 
 and many more I imagine, but these were the primary ones.
+
+# Links 🔗
+
+[![Itch.io](https://img.shields.io/badge/itch.io-%23FF0B34.svg?logo=Itch.io&logoColor=white)](https://gamedevoverdose.itch.io/)  [![LinkedIn](https://img.shields.io/badge/Linkedin-%230077B5.svg?logo=linkedin&logoColor=white)](https://ca.linkedin.com/in/ayush-vaibhav-goyal-aa17952b6)
