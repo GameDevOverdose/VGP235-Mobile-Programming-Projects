@@ -22,7 +22,7 @@ While hectic, the app still somehow came together towards the end, which even th
 
 - UI and the overall aesthetic leaves a lot to be desired. White space, awkward formatting and inconsistent visuals would be the highest priority in things that need fixing.
 - Out of the list of requirements that needed implementing, one thing that I entirely skipped was keywords (basically hobbies/interest) for both users, which led to a basic algorithm implementation since those keywords would have the highest weightage otherwise when trying to determine a match.
-- The details that the users input in the settings were meant to be displayed on the home page.
+- The details that the users input in the settings were meant to be displayed on the home page apart from that, the discover users' details would benefit from being labelled.
 - A nice to have, would be the match system hinting and displaying what factors led it to come to the conclusion that it did.
 
 
