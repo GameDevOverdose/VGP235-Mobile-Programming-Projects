@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="128dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/groupNameTextView_id"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fontFamily="@font/swanky_and_moo_moo"
+        android:gravity="bottom|center_horizontal"
+        android:paddingBottom="3dp"
+        android:text="Group Name"
+        android:textColor="#493636"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginLeft="70dp"
+        android:layout_marginRight="70dp"
+        android:layout_weight=".01"
+        android:background="#493636" />
+
+    <TextView
+        android:id="@+id/groupCountTextView_id"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fontFamily="casual"
+        android:gravity="center_horizontal|top"
+        android:paddingTop="3dp"
+        android:text="There are $n active items."
+        android:textAllCaps="false"
+        android:textColor="#6B5656"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <View
+        android:id="@+id/groupBottomDivider_id"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_weight=".01"
+        android:background="#493636" />
+</LinearLayout>

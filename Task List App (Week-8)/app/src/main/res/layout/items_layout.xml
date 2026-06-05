@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFDD8"
+    tools:context=".ItemsActivity">
+
+    <TextView
+        android:id="@+id/groupTitleTextView_id"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="20dp"
+        android:fontFamily="@font/swanky_and_moo_moo"
+        android:gravity="center"
+        android:text="Group Name"
+        android:textColor="#493636"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/newItemText_id"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="55dp"
+        android:ems="10"
+        android:fontFamily="casual"
+        android:hint="New Task?"
+        android:inputType="text"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/groupTitleTextView_id" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tasksBy_id"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="#00FFFFFF"
+        android:backgroundTint="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/newItemText_id" />
+
+    <Button
+        android:id="@+id/backButton_id"
+        android:layout_width="45dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:backgroundTint="#493636"
+        android:text="◀"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="@+id/groupTitleTextView_id"
+        app:layout_constraintEnd_toStartOf="@+id/groupTitleTextView_id" />
+
+    <Button
+        android:id="@+id/addButton_id"
+        android:layout_width="45dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#493636"
+        android:text="+"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="@+id/newItemText_id"
+        app:layout_constraintStart_toEndOf="@+id/newItemText_id" />
+</androidx.constraintlayout.widget.ConstraintLayout>
