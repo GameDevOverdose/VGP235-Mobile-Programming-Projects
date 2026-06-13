@@ -5,15 +5,19 @@
       <config />
     </shared>
     <layouts>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_home.xml">
         <config>
-          <theme>@style/Theme.MyCoolMemoryGame</theme>
+          <theme>@style/Theme.MyFinalApp</theme>
         </config>
       </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/tile_layout.xml">
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_minesweeper.xml">
         <config>
-          <state>Portrait</state>
-          <theme>@style/Theme.MyCoolMemoryGame</theme>
+          <theme>@android:style/Theme.Material.Light</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_tic_tac_toe.xml">
+        <config>
+          <theme>@style/Theme.MyFinalApp</theme>
         </config>
       </layout>
     </layouts>
@@ -22,9 +26,46 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="49015a3c-7f7a-4294-b6ef-2438122eea2d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../Project-1 (Week-9)/app/src/main/java/com/lasallecollegevancouver/myfragmentapp/MyFragment.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../Project-1 (Week-9)/app/src/main/res/layout/my_fragment_layout.xml" afterDir="false" />
+    <list default="true" id="6a40e8c4-fc99-4fa8-8b2f-d2c03d5e028c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../Project-2/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/proguard-rules.pro" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/androidTest/java/com/lasallecollegevancouver/myfinalapp/ExampleInstrumentedTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/java/com/lasallecollegevancouver/myfinalapp/MainActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/drawable/ic_launcher_foreground.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-anydpi/ic_launcher.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-anydpi/ic_launcher_round.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/values-night/themes.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/values/themes.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/xml/backup_rules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/main/res/xml/data_extraction_rules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/app/src/test/java/com/lasallecollegevancouver/myfinalapp/ExampleUnitTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/gradle.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/gradle/libs.versions.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/gradlew" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/gradlew.bat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Project-2/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Project-2 (Week-9)/.idea/caches/deviceStreaming.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Project-2 (Week-9)/.idea/workspace.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +89,7 @@
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="My Cool Memory Game" type="f1a62948:ProjectNode" />
+                <item name="My Final App" type="f1a62948:ProjectNode" />
               </path>
             </expand>
             <select />
@@ -60,7 +101,6 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="layoutResourceFile" />
         <option value="Kotlin Class" />
       </list>
     </option>
@@ -70,9 +110,9 @@
   </component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\ayush\.gradle\wrapper\dists\gradle-9.3.1-bin\23ovyewtku6u96viwx3xl3oks\gradle-9.3.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.3.1" />
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 3
+  &quot;associatedIndex&quot;: 4
 }</component>
-  <component name="ProjectId" id="3EjZ791hJzLTzqlotbb1mLBJUvz" />
+  <component name="ProjectId" id="3F2clMtRWQY2iL71mTd1QhFliQk" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -93,7 +133,7 @@
 }</component>
   <component name="RunManager">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
-      <module name="My_Cool_Memory_Game.app" />
+      <module name="My_Final_App.app" />
       <option name="ANDROID_RUN_CONFIGURATION_SCHEMA_VERSION" value="1" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
@@ -165,25 +205,25 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="49015a3c-7f7a-4294-b6ef-2438122eea2d" name="Changes" comment="" />
-      <created>1780693768474</created>
+      <changelist id="6a40e8c4-fc99-4fa8-8b2f-d2c03d5e028c" name="Changes" comment="" />
+      <created>1781276755091</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1780693768474</updated>
+      <updated>1781276755091</updated>
     </task>
     <servers />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
       <map>
-        <entry key="com.lasallecollegevancouver.mycoolmemorygame">
+        <entry key="com.lasallecollegevancouver.myfinalapp">
           <value>
-            <CheckInfo lastCheckTimestamp="1780693835735" />
+            <CheckInfo lastCheckTimestamp="1781278142696" />
           </value>
         </entry>
-        <entry key="com.lasallecollegevancouver.mycoolmemorygame.test">
+        <entry key="com.lasallecollegevancouver.myfinalapp.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1780693835736" />
+            <CheckInfo lastCheckTimestamp="1781278142697" />
           </value>
         </entry>
       </map>
