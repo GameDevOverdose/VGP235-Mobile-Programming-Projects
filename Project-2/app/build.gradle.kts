@@ -39,6 +39,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation("io.coil-kt:coil:2.6.0")
+    implementation("org.jsoup:jsoup:1.17.2")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

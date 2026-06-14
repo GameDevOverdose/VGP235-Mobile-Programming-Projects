@@ -1,6 +1,9 @@
 package com.lasallecollegevancouver.myfinalapp
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import org.jsoup.Jsoup
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -71,6 +74,24 @@ interface SteamStoreApiService {
 // --- REPOSITORY ---
 
 class SteamRepository(private val apiKey: String) {
+
+    private val tagBlacklist = arrayOf(
+        "In-App Purchases", "Multi-player", "Free to Play",
+        "Sexual Content", "Nudity", "+", "Indie", "Early Access",
+        "Singleplayer", "Multiplayer", "Co-op", "Online Co-Op",
+        "Steam Cloud", "Full controller support", "Tracked Controller Support",
+        "PvP", "PvE", "Competitive", "Steam Achievements", "Steam Trading Cards",
+        "Steam Workshop", "Steam Leaderboards", "Remote Play Together",
+        "Remote Play on Phone", "Remote Play on Tablet", "Remote Play on TV",
+        "VR Only", "VR Supported", "VR", "Partial Controller Support",
+        "Great Soundtrack", "Soundtrack", "Violent", "Gore", "Family Sharing",
+        "Software", "Software Training", "Education", "Utilities", "Design & Illustration",
+        "Animation & Modeling", "Game Development", "Hentai", "Capitalism", "3D", "2D",
+        "Cinematic", "Lore-Rich", "Casual", "Atmospheric", "Story Rich", "Single-player",
+        "Action", "Adventure", "Action-Adventure", "FPS", "First-Person", "Third Person",
+        "Hero Shooter", "Team-Based", "Difficult", "Superhero", "Massively Multiplayer",
+        "MMO", "MMORPG", "Side Scroller", "Top-Down", "Third-Person Shooter"
+    )
 
     /**
      * Orchestrates all three API calls and returns the combined data.
@@ -152,43 +173,67 @@ class SteamRepository(private val apiKey: String) {
             return
         }
 
-        // Take top 5 most played games to analyze genres (Store API has rate limits)
         val topGames = games.sortedByDescending { it.playtime_forever ?: 0 }.take(5)
-        val genreCounts = mutableMapOf<String, Int>()
+        val genreCounts = java.util.concurrent.ConcurrentHashMap<String, Int>()
         var completed = 0
+        val mainHandler = Handler(Looper.getMainLooper())
+
+        fun checkAll() {
+            synchronized(this) {
+                completed++
+                if (completed == topGames.size) {
+                    val topGenres = genreCounts.entries
+                        .sortedByDescending { it.value }
+                        .take(3)
+                        .map { it.key }
+                    mainHandler.post {
+                        onResult(FullUserData(player, owned, recent, topGenres))
+                    }
+                }
+            }
+        }
 
         for (game in topGames) {
             val appId = game.appid ?: continue
             RetrofitClient.storeInstance.getAppDetails(appId.toString()).enqueue(object : Callback<AppDetailsResponse> {
                 override fun onResponse(call: Call<AppDetailsResponse>, response: Response<AppDetailsResponse>) {
-                    val details = response.body()?.get(appId.toString())
-                    if (details?.success == true) {
-                        val genres = details.data?.genres?.mapNotNull { it.description }
-                            ?.filter { it != "In-App Purchases" && it != "Multi-player" && it != "Free to Play" } ?: emptyList()
-                        Log.d("SteamDebug", "Genres for ${game.name ?: appId}: $genres")
-                        
-                        genres.forEach { desc ->
-                            genreCounts[desc] = genreCounts.getOrDefault(desc, 0) + 1
+                    Thread {
+                        try {
+                            // 1. Process Official Genres
+                            val details = response.body()?.get(appId.toString())
+                            if (details?.success == true) {
+                                details.data?.genres?.mapNotNull { it.description }?.forEach { genre ->
+                                    if (tagBlacklist.none { it.equals(genre, ignoreCase = true) }) {
+                                        genreCounts[genre] = (genreCounts[genre] ?: 0) + 1
+                                    }
+                                }
+                            }
+
+                            // 2. Scrape Store Tags with Age-Gate Bypass
+                            val url = "https://store.steampowered.com/app/$appId"
+                            val doc = Jsoup.connect(url)
+                                .cookie("birthtime", "283993201") // Bypass age verification
+                                .get()
+                            val tags = doc.select(".app_tag").map { it.text().trim() }
+                            
+                            Log.d("SteamDebug", "Processing tags for ${game.name ?: appId}: $tags")
+                            
+                            tags.forEach { tag ->
+                                if (tag.isNotEmpty() && tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {
+                                    // Tags contribute to the same frequency map as genres
+                                    genreCounts[tag] = (genreCounts[tag] ?: 0) + 1
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("SteamDebug", "Error processing tags for $appId", e)
+                        } finally {
+                            checkAll()
                         }
-                    } else {
-                        Log.d("SteamDebug", "Failed to fetch details for ${game.name ?: appId}")
-                    }
-                    checkAll()
+                    }.start()
                 }
 
                 override fun onFailure(call: Call<AppDetailsResponse>, t: Throwable) {
                     checkAll()
-                }
-
-                private fun checkAll() {
-                    completed++
-                    if (completed == topGames.size) {
-                        val topGenres = genreCounts.entries
-                            .sortedByDescending { it.value }
-                            .take(3)
-                            .map { it.key }
-                        onResult(FullUserData(player, owned, recent, topGenres))
-                    }
                 }
             })
         }
