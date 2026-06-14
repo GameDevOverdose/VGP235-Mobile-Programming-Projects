@@ -94,6 +94,56 @@ class SteamRepository(private val apiKey: String) {
     )
 
     /**
+     * Searches for games on the Steam Store by a specific genre or tag.
+     */
+    fun searchGamesByGenre(genre: String, isNiche: Boolean = false, onResult: (List<Game>) -> Unit) {
+        Thread {
+            try {
+                // Removing filter=topsellers to restore Relevance. 
+                // Steam's relevance engine is better at finding "True" genre hits.
+                val url = "https://store.steampowered.com/search/?term=${genre.replace(" ", "+")}&category1=998"
+                
+                val doc = Jsoup.connect(url).get()
+                val searchResults = doc.select(".search_result_row")
+                
+                val games = searchResults.mapNotNull { element ->
+                    val appId = element.attr("data-ds-appid").split(",").firstOrNull()?.toIntOrNull()
+                    val name = element.select(".title").text()
+                    
+                    val reviewData = element.select(".search_review_summary")
+                    val reviewTooltip = reviewData.attr("data-tooltip-html")
+                    
+                    val scoreMatch = Regex("(\\d+)%").find(reviewTooltip)
+                    val countMatch = Regex("of the ([\\d,]+) user reviews").find(reviewTooltip)
+                    
+                    val score = scoreMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
+                    val count = countMatch?.groupValues?.get(1)?.replace(",", "")?.toIntOrNull() ?: 0
+                    
+                    val isHighQuality = score >= 80 && (reviewTooltip.contains("Positive") || 
+                                       reviewTooltip.contains("Very Positive") || 
+                                       reviewTooltip.contains("Overwhelmingly Positive"))
+                    
+                    if (appId != null && name.isNotEmpty() && isHighQuality) {
+                        Game(
+                            appid = appId, 
+                            name = name, 
+                            reviewScore = score, 
+                            reviewCount = count
+                        )
+                    } else null
+                }
+                
+                val mainHandler = Handler(Looper.getMainLooper())
+                mainHandler.post { onResult(games) }
+            } catch (e: Exception) {
+                Log.e("SteamDebug", "Error searching games for genre $genre", e)
+                val mainHandler = Handler(Looper.getMainLooper())
+                mainHandler.post { onResult(emptyList()) }
+            }
+        }.start()
+    }
+
+    /**
      * Orchestrates all three API calls and returns the combined data.
      * It first attempts to resolve the input if it's a vanity URL.
      */

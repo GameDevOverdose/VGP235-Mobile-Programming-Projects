@@ -20,6 +20,26 @@ class HomeActivity : AppCompatActivity() {
     private var currentUserData: FullUserData? = null
     private var isShowingRecommendations = false
 
+    private val adjacentTags = mapOf(
+        "RPG" to "Action RPG",
+        "Action" to "Adventure",
+        "Shooter" to "FPS",
+        "Strategy" to "Turn-Based Strategy",
+        "Indie" to "Roguelike",
+        "Simulation" to "Management",
+        "Adventure" to "Story Rich",
+        "Horror" to "Psychological Horror",
+        "Psychological Horror" to "Atmospheric",
+        "Platformer" to "Precision Platformer",
+        "Survival" to "Open World Survival Craft",
+        "Co-op" to "Online Co-Op",
+        "Puzzle" to "Logic",
+        "Racing" to "Automobile Sim",
+        "Sports" to "Football",
+        "Sandbox" to "Open World",
+        "RPG" to "Story Rich"
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -51,7 +71,6 @@ class HomeActivity : AppCompatActivity() {
 
     private fun toggleRecommendations() {
         val data = currentUserData ?: return
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_id)
         val recommendButton = findViewById<Button>(R.id.recommendGamesButton_id)
 
         if (isShowingRecommendations) {
@@ -61,46 +80,111 @@ class HomeActivity : AppCompatActivity() {
         } else {
             isShowingRecommendations = true
             recommendButton.text = "Back to Profile"
-            // Part 2: Generate and show recommendations
-            val recommendations = generateRecommendations(data)
-            recyclerView.adapter = CategoryAdapter(recommendations)
+            fetchDynamicRecommendations(data)
         }
     }
 
-    private fun generateRecommendations(data: FullUserData): List<Category> {
+    private fun fetchDynamicRecommendations(data: FullUserData) {
+        val progressBar = findViewById<ProgressBar>(R.id.progressBar_id)
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_id)
+        progressBar.visibility = View.VISIBLE
+        recyclerView.adapter = CategoryAdapter(emptyList())
+
         val ownedAppIds = data.ownedGames?.games?.mapNotNull { it.appid }?.toSet() ?: emptySet()
-        val recommendations = mutableListOf<Category>()
+        val topGenres = data.topGenres.take(3)
+        
+        if (topGenres.isEmpty()) {
+            progressBar.visibility = View.GONE
+            return
+        }
 
-        val pool = mapOf(
-            "Action" to listOf(Game(1245620, "Elden Ring"), Game(1091500, "Cyberpunk 2077"), Game(582010, "Monster Hunter: World")),
-            "Shooter" to listOf(Game(782330, "DOOM Eternal"), Game(1240440, "Halo Infinite"), Game(1085660, "Destiny 2")),
-            "RPG" to listOf(Game(1086940, "Baldur's Gate 3"), Game(292030, "The Witcher 3: Wild Hunt"), Game(1340710, "Persona 5 Royal")),
-            "Strategy" to listOf(Game(289070, "Sid Meier’s Civ VI"), Game(281990, "Stellaris"), Game(268500, "XCOM 2")),
-            "Adventure" to listOf(Game(1174180, "Red Dead Redemption 2"), Game(1151640, "Horizon Zero Dawn"), Game(1151640, "God of War")),
-            "Indie" to listOf(Game(367520, "Hollow Knight"), Game(753640, "Outer Wilds"), Game(413150, "Stardew Valley")),
-            "Third-Person Shooter" to listOf(Game(1085660, "Destiny 2"), Game(1238810, "Battlefield V"), Game(1238840, "Battlefield 1")),
-            "Roguelike" to listOf(Game(1145360, "Hades"), Game(553850, "Dead Cells"), Game(632360, "Risk of Rain 2"))
-        )
+        // Collect all necessary search terms
+        val searchTerms = mutableSetOf<String>()
+        topGenres.forEach { genre ->
+            searchTerms.add(genre)
+            searchTerms.add(adjacentTags[genre] ?: genre)
+        }
 
-        data.topGenres.take(3).forEach { genre ->
-            val genreKey = pool.keys.find { it.equals(genre, ignoreCase = true) }
-            val gamesForGenre = if (genreKey != null) pool[genreKey] else pool["Action"]
+        val resultsMap = mutableMapOf<String, List<Game>>()
+        var completedCalls = 0
 
-            val filtered = gamesForGenre?.filter { it.appid !in ownedAppIds }?.take(3) ?: emptyList()
-            if (filtered.isNotEmpty()) {
-                recommendations.add(Category("Because you like $genre", filtered))
+        fun processCuratedList() {
+            val allSeenIds = ownedAppIds.toMutableSet()
+            val recommendations = mutableListOf<Category>()
+
+            topGenres.forEach { genre ->
+                val adjacentTag = adjacentTags[genre] ?: genre
+                val genreGames = resultsMap[genre] ?: emptyList()
+                val adjacentGames = resultsMap[adjacentTag] ?: emptyList()
+
+                val curatedGames = mutableListOf<Game>()
+
+                // 1. Popular Pick: The most "Relevant" hit that is also a major seller
+                genreGames
+                    .filter { it.appid !in allSeenIds }
+                    .take(10) // Only look at the most relevant results
+                    .maxByOrNull { it.reviewCount }
+                    ?.let {
+                        it.recommendationType = "Popular"
+                        curatedGames.add(it)
+                        it.appid?.let { id -> allSeenIds.add(id) }
+                    }
+
+                // 2. Adjacent Pick: Broadening the DNA within the top relevance bracket
+                adjacentGames
+                    .filter { it.appid !in allSeenIds }
+                    .take(15)
+                    .maxByOrNull { it.reviewCount }
+                    ?.let {
+                        it.recommendationType = "Adjacent"
+                        curatedGames.add(it)
+                        it.appid?.let { id -> allSeenIds.add(id) }
+                    }
+
+                // 3. Niche Pick (Hidden Gem): High-score "Cult Classics" with lower review volume
+                // We look for games with elite scores (90%+) but under 15k reviews
+                genreGames
+                    .filter { it.appid !in allSeenIds && it.reviewCount in 500..15000 && it.reviewScore >= 90 }
+                    .maxByOrNull { it.reviewScore }
+                    ?.let {
+                        it.recommendationType = "Niche"
+                        curatedGames.add(it)
+                        it.appid?.let { id -> allSeenIds.add(id) }
+                    }
+                
+                // Fallback for Niche: If no elite gem found in Top Sellers, 
+                // we'll take the highest rated game that's further down the results
+                if (curatedGames.size < 3) {
+                    genreGames
+                        .filter { it.appid !in allSeenIds && it.reviewCount > 100 }
+                        .sortedByDescending { it.reviewScore }
+                        .drop(5) // Ensure we skip the obvious ones
+                        .firstOrNull()
+                        ?.let {
+                            it.recommendationType = "Niche"
+                            curatedGames.add(it)
+                            it.appid?.let { id -> allSeenIds.add(id) }
+                        }
+                }
+
+                if (curatedGames.isNotEmpty()) {
+                    recommendations.add(Category("$genre DNA", curatedGames))
+                }
+            }
+
+            progressBar.visibility = View.GONE
+            recyclerView.adapter = CategoryAdapter(recommendations)
+        }
+
+        searchTerms.forEach { term ->
+            repository.searchGamesByGenre(term) { games ->
+                resultsMap[term] = games
+                completedCalls++
+                if (completedCalls == searchTerms.size) {
+                    processCuratedList()
+                }
             }
         }
-
-        if (recommendations.isEmpty()) {
-            recommendations.add(Category("Recommended for You", listOf(
-                Game(1245620, "Elden Ring"),
-                Game(1086940, "Baldur's Gate 3"),
-                Game(1174180, "Red Dead Redemption 2")
-            ).filter { it.appid !in ownedAppIds }))
-        }
-
-        return recommendations
     }
 
     private fun showProfileCategories(data: FullUserData) {

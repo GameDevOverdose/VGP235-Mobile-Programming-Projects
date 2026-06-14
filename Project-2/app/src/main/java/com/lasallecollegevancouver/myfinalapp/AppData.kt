@@ -28,7 +28,10 @@ data class Game(
     val name: String? = null,
     val playtime_forever: Int? = null,
     val img_icon_url: String? = null,
-    val imageRes: Int = 0
+    val imageRes: Int = 0,
+    var recommendationType: String? = null,
+    var reviewScore: Int = 0,
+    var reviewCount: Int = 0
 )
 
 data class RecentlyPlayedResponse(val response: RecentlyPlayedContainer)
