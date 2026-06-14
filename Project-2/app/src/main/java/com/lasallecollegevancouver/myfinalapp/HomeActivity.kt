@@ -61,8 +61,9 @@ class HomeActivity : AppCompatActivity() {
         } else {
             isShowingRecommendations = true
             recommendButton.text = "Back to Profile"
-            // Part 1: Empty the recycler view
-            recyclerView.adapter = CategoryAdapter(emptyList(), emptyList())
+            // Part 2: Generate and show recommendations
+            val recommendations = generateRecommendations(data)
+            recyclerView.adapter = CategoryAdapter(recommendations)
         }
     }
 
