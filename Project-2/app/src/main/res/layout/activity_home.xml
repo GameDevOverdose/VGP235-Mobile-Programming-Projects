@@ -10,42 +10,32 @@
 
     <EditText
         android:id="@+id/steamIdTextEdit_id"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:ems="10"
         android:fontFamily="@font/akatab"
         android:hint="SteamId"
-        android:inputType="text"
+        android:inputType="number"
         android:textColor="#FFFFFF"
         android:textColorHint="	#adadad"
-        app:layout_constraintEnd_toStartOf="@+id/searchButton_id"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/searchButton_id"
-        android:layout_width="55dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:backgroundTint="#66c0f4"
-        android:text=">"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/steamIdTextEdit_id"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/playerHeaderLinearLayout_id"
         android:layout_width="0dp"
         android:layout_height="100dp"
         android:layout_marginTop="20dp"
         android:background="	#171a21"
         android:orientation="horizontal"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchButton_id">
+        app:layout_constraintTop_toBottomOf="@+id/steamIdTextEdit_id">
 
         <ImageView
             android:id="@+id/avatarImageView_id"
@@ -137,6 +127,23 @@
 
     </LinearLayout>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/playerDataRv_id"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="#232730"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/recommendGamesButton_id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playerHeaderLinearLayout_id">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
     <Button
         android:id="@+id/recommendGamesButton_id"
         android:layout_width="0dp"
@@ -148,25 +155,10 @@
         android:fontFamily="@font/akatab"
         android:text="Start Recommendation"
         android:textColor="#FFFFFF"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView_id"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="#232730"
-        app:layout_constraintBottom_toTopOf="@+id/recommendGamesButton_id"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
-
-    </androidx.recyclerview.widget.RecyclerView>
 
     <ProgressBar
         android:id="@+id/progressBar_id"

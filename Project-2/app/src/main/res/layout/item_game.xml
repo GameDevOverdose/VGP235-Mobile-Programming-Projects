@@ -52,4 +52,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/gameTitle" />
 
+    <TextView
+        android:id="@+id/gameReviews"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textColor="#a3a3a3"
+        android:textSize="9sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recommendationType" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

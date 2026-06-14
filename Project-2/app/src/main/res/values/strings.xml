@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">My Final App</string>
+    <string name="app_name">Steam Discovery</string>
+    <string name="review_stats_format">%1$d%% (%2$s)</string>
+    <string name="recommendation_type_popular">Popular Choice</string>
+    <string name="recommendation_type_adjacent">Similar to your tastes</string>
+    <string name="recommendation_type_niche">Hidden Gem</string>
 </resources>

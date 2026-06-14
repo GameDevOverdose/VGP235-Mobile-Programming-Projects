@@ -99,9 +99,9 @@ class SteamRepository(private val apiKey: String) {
     fun searchGamesByGenre(genre: String, isNiche: Boolean = false, onResult: (List<Game>) -> Unit) {
         Thread {
             try {
-                // Removing filter=topsellers to restore Relevance. 
-                // Steam's relevance engine is better at finding "True" genre hits.
-                val url = "https://store.steampowered.com/search/?term=${genre.replace(" ", "+")}&category1=998"
+                // For Niche picks, we sometimes want to narrow down the search to high-quality tags
+                val searchTerm = if (isNiche) "$genre+masterpiece" else genre.replace(" ", "+")
+                val url = "https://store.steampowered.com/search/?term=$searchTerm&category1=998"
                 
                 val doc = Jsoup.connect(url).get()
                 val searchResults = doc.select(".search_result_row")
@@ -119,16 +119,16 @@ class SteamRepository(private val apiKey: String) {
                     val score = scoreMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
                     val count = countMatch?.groupValues?.get(1)?.replace(",", "")?.toIntOrNull() ?: 0
                     
-                    val isHighQuality = score >= 80 && (reviewTooltip.contains("Positive") || 
+                    // Quality threshold: At least 70% positive for general search, 
+                    // but we'll refine further in HomeActivity.
+                    val isAcceptable = score >= 70 && (reviewTooltip.contains("Positive") || 
                                        reviewTooltip.contains("Very Positive") || 
                                        reviewTooltip.contains("Overwhelmingly Positive"))
                     
-                    if (appId != null && name.isNotEmpty() && isHighQuality) {
+                    if (appId != null && name.isNotEmpty() && isAcceptable) {
                         Game(
                             appid = appId, 
-                            name = name, 
-                            reviewScore = score, 
-                            reviewCount = count
+                            name = name
                         )
                     } else null
                 }
@@ -234,7 +234,7 @@ class SteamRepository(private val apiKey: String) {
                 if (completed == topGames.size) {
                     val topGenres = genreCounts.entries
                         .sortedByDescending { it.value }
-                        .take(3)
+                        .take(10)
                         .map { it.key }
                     mainHandler.post {
                         onResult(FullUserData(player, owned, recent, topGenres))
