@@ -8,31 +8,55 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class CategoryAdapter(private val categories: List<Category>) :
-    RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
+class CategoryAdapter(
+    private val categories: List<Category>,
+    private val topGenres: List<String> = emptyList()
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    companion object {
+        private const val TYPE_CATEGORY = 0
+        private const val TYPE_GENRE_STATS = 1
+    }
 
     class CategoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.categoryTitle)
         val recycler: RecyclerView = view.findViewById(R.id.horizontalRecycler)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.games_layout, parent, false)
-        return CategoryViewHolder(view)
+    class GenreStatsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val genreText: TextView = view.findViewById(R.id.genreText_id)
     }
 
-    override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
-        val category = categories[position]
-
-        holder.title.text = category.title
-        holder.title.setTextColor(Color.WHITE)
-
-        holder.recycler.layoutManager =
-            LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
-
-        holder.recycler.adapter = GameAdapter(category.games)
+    override fun getItemViewType(position: Int): Int {
+        return if (position < categories.size) TYPE_CATEGORY else TYPE_GENRE_STATS
     }
 
-    override fun getItemCount() = categories.size
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_CATEGORY) {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.games_layout, parent, false)
+            CategoryViewHolder(view)
+        } else {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_genre_stats, parent, false)
+            GenreStatsViewHolder(view)
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is CategoryViewHolder) {
+            val category = categories[position]
+            holder.title.text = category.title
+            holder.title.setTextColor(Color.WHITE)
+            holder.recycler.layoutManager =
+                LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
+            holder.recycler.adapter = GameAdapter(category.games)
+        } else if (holder is GenreStatsViewHolder) {
+            val text = topGenres.mapIndexed { index, genre -> "${index + 1}. $genre" }
+                .joinToString("\n")
+            holder.genreText.text = text
+        }
+    }
+
+    override fun getItemCount() = if (topGenres.isNotEmpty()) categories.size + 1 else categories.size
 }

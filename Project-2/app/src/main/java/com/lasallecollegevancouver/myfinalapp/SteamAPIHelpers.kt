@@ -1,5 +1,6 @@
 package com.lasallecollegevancouver.myfinalapp
 
+import android.util.Log
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -12,6 +13,7 @@ import retrofit2.http.Query
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.steampowered.com/"
+    private const val STORE_URL = "https://store.steampowered.com/"
 
     val instance: SteamApiService by lazy {
         Retrofit.Builder()
@@ -19,6 +21,14 @@ object RetrofitClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(SteamApiService::class.java)
+    }
+
+    val storeInstance: SteamStoreApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(STORE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(SteamStoreApiService::class.java)
     }
 }
 
@@ -49,6 +59,13 @@ interface SteamApiService {
         @Query("key") key: String,
         @Query("vanityurl") vanityUrl: String
     ): Call<VanityURLResponse>
+}
+
+interface SteamStoreApiService {
+    @GET("api/appdetails")
+    fun getAppDetails(
+        @Query("appids") appIds: String
+    ): Call<AppDetailsResponse>
 }
 
 // --- REPOSITORY ---
@@ -90,7 +107,8 @@ class SteamRepository(private val apiKey: String) {
         fun checkCompletion() {
             completedCalls++
             if (completedCalls == 3) {
-                onResult(FullUserData(player, owned, recent))
+                // After fetching basic user data, fetch genres for top games
+                fetchGenresForTopGames(owned?.games, player, owned, recent, onResult)
             }
         }
 
@@ -120,5 +138,59 @@ class SteamRepository(private val apiKey: String) {
             }
             override fun onFailure(call: Call<RecentlyPlayedResponse>, t: Throwable) { checkCompletion() }
         })
+    }
+
+    private fun fetchGenresForTopGames(
+        games: List<Game>?,
+        player: Player?,
+        owned: OwnedGamesContainer?,
+        recent: List<Game>?,
+        onResult: (FullUserData) -> Unit
+    ) {
+        if (games.isNullOrEmpty()) {
+            onResult(FullUserData(player, owned, recent))
+            return
+        }
+
+        // Take top 5 most played games to analyze genres (Store API has rate limits)
+        val topGames = games.sortedByDescending { it.playtime_forever ?: 0 }.take(5)
+        val genreCounts = mutableMapOf<String, Int>()
+        var completed = 0
+
+        for (game in topGames) {
+            val appId = game.appid ?: continue
+            RetrofitClient.storeInstance.getAppDetails(appId.toString()).enqueue(object : Callback<AppDetailsResponse> {
+                override fun onResponse(call: Call<AppDetailsResponse>, response: Response<AppDetailsResponse>) {
+                    val details = response.body()?.get(appId.toString())
+                    if (details?.success == true) {
+                        val genres = details.data?.genres?.mapNotNull { it.description }
+                            ?.filter { it != "In-App Purchases" && it != "Multi-player" && it != "Free to Play" } ?: emptyList()
+                        Log.d("SteamDebug", "Genres for ${game.name ?: appId}: $genres")
+                        
+                        genres.forEach { desc ->
+                            genreCounts[desc] = genreCounts.getOrDefault(desc, 0) + 1
+                        }
+                    } else {
+                        Log.d("SteamDebug", "Failed to fetch details for ${game.name ?: appId}")
+                    }
+                    checkAll()
+                }
+
+                override fun onFailure(call: Call<AppDetailsResponse>, t: Throwable) {
+                    checkAll()
+                }
+
+                private fun checkAll() {
+                    completed++
+                    if (completed == topGames.size) {
+                        val topGenres = genreCounts.entries
+                            .sortedByDescending { it.value }
+                            .take(3)
+                            .map { it.key }
+                        onResult(FullUserData(player, owned, recent, topGenres))
+                    }
+                }
+            })
+        }
     }
 }

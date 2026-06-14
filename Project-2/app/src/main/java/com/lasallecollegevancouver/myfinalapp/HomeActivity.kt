@@ -42,7 +42,6 @@ class HomeActivity : AppCompatActivity() {
         }
 
         // Initial load with a known Steam ID
-        //updateUI("76561198250866766")
         updateUI("76561198314066783")
     }
 
@@ -59,7 +58,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateUI(steamId: String) {
-        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
+        val progressBar = findViewById<ProgressBar>(R.id.progressBar_id)
         progressBar.visibility = View.VISIBLE
 
         repository.loadFullUserData(steamId) { data ->
@@ -73,6 +72,8 @@ class HomeActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.gamesOwnedTextView_id).text = "Games Owned: 0"
                 findViewById<TextView>(R.id.hoursPlayedTextView_id).text = "Total Hours: 0h"
                 findViewById<TextView>(R.id.recentlyPlayedTextView_id).text = "Recent: None"
+                findViewById<TextView>(R.id.topGenresTextView_id).text = "Genres: N/A"
+                findViewById<RecyclerView>(R.id.recyclerView_id).adapter = CategoryAdapter(emptyList())
                 return@loadFullUserData
             }
 
@@ -99,24 +100,34 @@ class HomeActivity : AppCompatActivity() {
             // --- Update RecyclerView with Real Data ---
             val categories = mutableListOf<Category>()
 
-            // 1. All Owned Games Category
-            owned?.games?.let {
-                if (it.isNotEmpty()) {
-                    categories.add(Category("Library", it))
-                }
-            }
-
-
-
-            // 3. Recently Played Category
+            // 1. Recently Played Category
             data.recentlyPlayed?.let {
                 if (it.isNotEmpty()) {
                     categories.add(Category("Recently Played", it))
                 }
             }
 
-            // Refresh the adapter with the new categories
-            findViewById<RecyclerView>(R.id.recyclerView_id).adapter = CategoryAdapter(categories)
+            // 2. Most Played Games Category
+            owned?.games?.let { games ->
+                val mostPlayed = games.sortedByDescending { it.playtime_forever ?: 0 }.take(10)
+                if (mostPlayed.isNotEmpty()) {
+                    categories.add(Category("Most Played", mostPlayed))
+                }
+            }
+
+            // 3. All Owned Games Category
+            owned?.games?.let {
+                if (it.isNotEmpty()) {
+                    categories.add(Category("Library", it))
+                }
+            }
+
+            // --- Update Top Genres from API data ---
+            val topGenres = data.topGenres
+            findViewById<TextView>(R.id.topGenresTextView_id).text = "Top Genres: ${topGenres.ifEmpty { listOf("N/A") }.joinToString(", ")}"
+
+            // Refresh the adapter with the new categories and top genres
+            findViewById<RecyclerView>(R.id.recyclerView_id).adapter = CategoryAdapter(categories, topGenres)
         }
     }
 }

@@ -43,9 +43,28 @@ data class VanityURLContainer(
     val success: Int
 )
 
+// --- STORE API MODELS ---
+// The Store API returns a map where the key is the AppID string
+typealias AppDetailsResponse = Map<String, StoreAppDetailsResponse>
+
+data class StoreAppDetailsResponse(
+    val success: Boolean,
+    val data: StoreGameData?
+)
+
+data class StoreGameData(
+    val genres: List<StoreGenre>?
+)
+
+data class StoreGenre(
+    val id: String?,
+    val description: String?
+)
+
 // A unified data class for the UI
 data class FullUserData(
     val player: Player?,
     val ownedGames: OwnedGamesContainer?,
-    val recentlyPlayed: List<Game>?
+    val recentlyPlayed: List<Game>?,
+    val topGenres: List<String> = emptyList()
 )
