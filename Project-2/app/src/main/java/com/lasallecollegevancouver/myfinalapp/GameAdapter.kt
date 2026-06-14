@@ -10,12 +10,17 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 
-class GameAdapter(private val games: List<Game>) :
+class GameAdapter(
+    private val games: List<Game>,
+    private val isRecommendation: Boolean = false,
+    private val onSelectionChanged: (Game) -> Unit = {}
+) :
     RecyclerView.Adapter<GameAdapter.GameViewHolder>() {
 
     class GameViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.gameTitle)
         val image: ImageView = view.findViewById(R.id.gameImage)
+        val overlay: ImageView = view.findViewById(R.id.gameOverlay)
         val typeBadge: TextView = view.findViewById(R.id.recommendationType)
     }
 
@@ -29,11 +34,25 @@ class GameAdapter(private val games: List<Game>) :
         val game = games[position]
         holder.title.text = game.name
 
+        // Update Overlay based on state
+        if (!isRecommendation) {
+            updateOverlay(holder, game)
+        } else {
+            holder.overlay.visibility = View.GONE
+        }
+
         holder.itemView.setOnClickListener {
-            game.appid?.let { id ->
-                val url = "https://store.steampowered.com/app/$id"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                holder.itemView.context.startActivity(intent)
+            if (isRecommendation) {
+                game.appid?.let { id ->
+                    val url = "https://store.steampowered.com/app/$id"
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    holder.itemView.context.startActivity(intent)
+                }
+            } else {
+                // Cycle state: 0 -> 1 -> 2 -> 0
+                game.selectionState = (game.selectionState + 1) % 3
+                updateOverlay(holder, game)
+                onSelectionChanged(game)
             }
         }
         
@@ -66,6 +85,22 @@ class GameAdapter(private val games: List<Game>) :
             }
         } else if (game.imageRes != 0) {
             holder.image.setImageResource(game.imageRes)
+        }
+    }
+
+    private fun updateOverlay(holder: GameViewHolder, game: Game) {
+        when (game.selectionState) {
+            1 -> {
+                holder.overlay.visibility = View.VISIBLE
+                holder.overlay.setImageResource(R.drawable.plus_game_overlay)
+            }
+            2 -> {
+                holder.overlay.visibility = View.VISIBLE
+                holder.overlay.setImageResource(R.drawable.minus_game_overlay)
+            }
+            else -> {
+                holder.overlay.visibility = View.GONE
+            }
         }
     }
 

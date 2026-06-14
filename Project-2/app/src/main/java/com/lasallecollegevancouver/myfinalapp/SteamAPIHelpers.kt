@@ -94,6 +94,26 @@ class SteamRepository(private val apiKey: String) {
     )
 
     /**
+     * Checks if a game has a valid library image on Steam's servers.
+     */
+    fun hasLibraryImage(appId: Int?): Boolean {
+        if (appId == null) return false
+        return try {
+            // Using the standard library poster URL
+            val url = "https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900.jpg"
+            val response = Jsoup.connect(url)
+                .ignoreContentType(true)
+                .ignoreHttpErrors(true)
+                .method(org.jsoup.Connection.Method.HEAD)
+                .timeout(2000)
+                .execute()
+            response.statusCode() == 200
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
      * Searches for games on the Steam Store by a specific genre or tag.
      */
     fun searchGamesByGenre(genre: String, isNiche: Boolean = false, onResult: (List<Game>) -> Unit) {
@@ -284,6 +304,71 @@ class SteamRepository(private val apiKey: String) {
 
                 override fun onFailure(call: Call<AppDetailsResponse>, t: Throwable) {
                     checkAll()
+                }
+            })
+        }
+    }
+
+    /**
+     * Fetches genres and tags for a specific list of games.
+     */
+    fun fetchGenresForSelectedGames(games: List<Game>, onResult: (Map<Int, List<String>>) -> Unit) {
+        if (games.isEmpty()) {
+            onResult(emptyMap())
+            return
+        }
+
+        val results = java.util.concurrent.ConcurrentHashMap<Int, List<String>>()
+        var completed = 0
+        val mainHandler = Handler(Looper.getMainLooper())
+
+        for (game in games) {
+            val appId = game.appid ?: continue
+            RetrofitClient.storeInstance.getAppDetails(appId.toString()).enqueue(object : Callback<AppDetailsResponse> {
+                override fun onResponse(call: Call<AppDetailsResponse>, response: Response<AppDetailsResponse>) {
+                    Thread {
+                        try {
+                            val gameTags = mutableListOf<String>()
+                            val details = response.body()?.get(appId.toString())
+                            if (details?.success == true) {
+                                details.data?.genres?.mapNotNull { it.description }?.forEach { genre ->
+                                    if (tagBlacklist.none { it.equals(genre, ignoreCase = true) }) {
+                                        gameTags.add(genre)
+                                    }
+                                }
+                            }
+
+                            val url = "https://store.steampowered.com/app/$appId"
+                            val doc = Jsoup.connect(url)
+                                .cookie("birthtime", "283993201")
+                                .get()
+                            val tags = doc.select(".app_tag").map { it.text().trim() }
+                            tags.forEach { tag ->
+                                if (tag.isNotEmpty() && tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {
+                                    gameTags.add(tag)
+                                }
+                            }
+                            results[appId] = gameTags.distinct()
+                        } catch (e: Exception) {
+                            Log.e("SteamDebug", "Error processing tags for $appId", e)
+                        } finally {
+                            synchronized(this@SteamRepository) {
+                                completed++
+                                if (completed == games.size) {
+                                    mainHandler.post { onResult(results) }
+                                }
+                            }
+                        }
+                    }.start()
+                }
+
+                override fun onFailure(call: Call<AppDetailsResponse>, t: Throwable) {
+                    synchronized(this@SteamRepository) {
+                        completed++
+                        if (completed == games.size) {
+                            mainHandler.post { onResult(results) }
+                        }
+                    }
                 }
             })
         }

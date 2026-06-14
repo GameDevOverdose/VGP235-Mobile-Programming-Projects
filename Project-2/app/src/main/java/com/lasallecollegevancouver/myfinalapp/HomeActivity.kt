@@ -89,11 +89,29 @@ class HomeActivity : AppCompatActivity() {
             isShowingRecommendations = true
             recommendButton.text = "Back to Profile"
             topGenresText.visibility = View.GONE
-            fetchDynamicRecommendations(data)
+            
+            // Collect selections
+            val allGames = (data.ownedGames?.games ?: emptyList()) + (data.recentlyPlayed ?: emptyList())
+            val plusGames = allGames.filter { it.selectionState == 1 }.distinctBy { it.appid }
+            val minusGames = allGames.filter { it.selectionState == 2 }.distinctBy { it.appid }
+
+            if (plusGames.isEmpty() && minusGames.isEmpty()) {
+                fetchDynamicRecommendations(data, emptyList(), emptyList())
+            } else {
+                val progressBar = findViewById<ProgressBar>(R.id.progressBar_id)
+                progressBar.visibility = View.VISIBLE
+                
+                // Fetch tags for selected games
+                repository.fetchGenresForSelectedGames(plusGames + minusGames) { tagsMap: Map<Int, List<String>> ->
+                    val plusTags = plusGames.flatMap { tagsMap[it.appid] ?: emptyList<String>() }.toSet()
+                    val minusTags = minusGames.flatMap { tagsMap[it.appid] ?: emptyList<String>() }.toSet()
+                    fetchDynamicRecommendations(data, plusTags.toList(), minusTags.toList())
+                }
+            }
         }
     }
 
-    private fun fetchDynamicRecommendations(data: FullUserData) {
+    private fun fetchDynamicRecommendations(data: FullUserData, plusTags: List<String>, minusTags: List<String>) {
         val progressBar = findViewById<ProgressBar>(R.id.progressBar_id)
         val recyclerView = findViewById<RecyclerView>(R.id.playerDataRv_id)
         progressBar.visibility = View.VISIBLE
@@ -101,12 +119,25 @@ class HomeActivity : AppCompatActivity() {
 
         val ownedAppIds = data.ownedGames?.games?.mapNotNull { it.appid }?.toSet() ?: emptySet()
 
-        // DNA Stability: Filter the topGenres based on a random subset to preserve rank
-        val randomSubset = data.topGenres.take(6).shuffled().take(3).toSet()
-        val selectedGenres = data.topGenres.filter { it in randomSubset }
+        val selectedGenres = if (plusTags.isEmpty() && minusTags.isEmpty()) {
+            // Default logic: Pick 3 random genres from top 6, maintaining original relative order
+            val randomSubset = data.topGenres.take(6).shuffled().take(3).toSet()
+            data.topGenres.filter { it in randomSubset }
+        } else {
+            // Filtered logic:
+            // 1. Start with a random mix of top genres (base variety)
+            val initialDna = data.topGenres.take(6).shuffled().take(4).toMutableList()
+            // 2. Add plus tags with high priority
+            val enhancedDna = (plusTags.take(8) + initialDna).distinct()
+            // 3. Remove minus tags and limit
+            enhancedDna.filter { tag ->
+                minusTags.none { it.equals(tag, ignoreCase = true) }
+            }.take(6)
+        }
 
         if (selectedGenres.isEmpty()) {
             progressBar.visibility = View.GONE
+            Toast.makeText(this, "No matching genres found with your filters!", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -120,6 +151,23 @@ class HomeActivity : AppCompatActivity() {
         val resultsMap = mutableMapOf<String, List<Game>>()
         var completedCalls = 0
 
+        /**
+         * FEATURE: IMAGE VERIFICATION
+         * If enabled, we verify that a game has a valid library poster on Steam servers before picking it.
+         * To disable this feature, simply set 'verifyImagesEnabled' to false.
+         */
+        val verifyImagesEnabled = true
+
+        fun findPickWithImage(candidates: List<Game>): Game? {
+            if (verifyImagesEnabled) {
+                // Return the first candidate that actually has an image
+                val verified = candidates.firstOrNull { repository.hasLibraryImage(it.appid) }
+                if (verified != null) return verified
+            }
+            // Fallback to the first one if feature is disabled or no verified images found
+            return candidates.firstOrNull()
+        }
+
         fun processCuratedList() {
             val allSeenIds = ownedAppIds.toMutableSet()
             val recommendations = mutableListOf<Category>()
@@ -132,53 +180,53 @@ class HomeActivity : AppCompatActivity() {
                 val curatedGames = mutableListOf<Game>()
 
                 // 1. Popular Pick: Randomly pick one from the top 10 most relevant hits
-                genreGames
+                val popularCandidates = genreGames
                     .filter { it.appid !in allSeenIds }
                     .take(10)
                     .shuffled()
-                    .firstOrNull()
-                    ?.let {
-                        it.recommendationType = getString(R.string.recommendation_type_popular)
-                        curatedGames.add(it)
-                        it.appid?.let { id -> allSeenIds.add(id) }
-                    }
+                
+                findPickWithImage(popularCandidates)?.let {
+                    it.recommendationType = getString(R.string.recommendation_type_popular)
+                    curatedGames.add(it)
+                    it.appid?.let { id -> allSeenIds.add(id) }
+                }
 
                 // 2. Adjacent Pick: Randomly pick one from the top 15 related matches
-                adjacentGames
+                val adjacentCandidates = adjacentGames
                     .filter { it.appid !in allSeenIds }
                     .take(15)
                     .shuffled()
-                    .firstOrNull()
-                    ?.let {
-                        it.recommendationType = getString(R.string.recommendation_type_adjacent)
-                        curatedGames.add(it)
-                        it.appid?.let { id -> allSeenIds.add(id) }
-                    }
+
+                findPickWithImage(adjacentCandidates)?.let {
+                    it.recommendationType = getString(R.string.recommendation_type_adjacent)
+                    curatedGames.add(it)
+                    it.appid?.let { id -> allSeenIds.add(id) }
+                }
 
                 // 3. Niche Pick (Hidden Gem): Randomly pick from all matching titles
-                genreGames
+                val nicheCandidates = genreGames
                     .filter { it.appid !in allSeenIds }
                     .shuffled()
-                    .firstOrNull()
-                    ?.let {
-                        it.recommendationType = getString(R.string.recommendation_type_niche)
-                        curatedGames.add(it)
-                        it.appid?.let { id -> allSeenIds.add(id) }
-                    }
+
+                findPickWithImage(nicheCandidates)?.let {
+                    it.recommendationType = getString(R.string.recommendation_type_niche)
+                    curatedGames.add(it)
+                    it.appid?.let { id -> allSeenIds.add(id) }
+                }
                 
                 // Fallback for Niche: Pick randomly from a deeper pool
                 if (curatedGames.size < 3) {
-                    genreGames
+                    val fallbackCandidates = genreGames
                         .filter { it.appid !in allSeenIds }
                         .drop(5)
                         .take(20)
                         .shuffled()
-                        .firstOrNull()
-                        ?.let {
-                            it.recommendationType = getString(R.string.recommendation_type_niche)
-                            curatedGames.add(it)
-                            it.appid?.let { id -> allSeenIds.add(id) }
-                        }
+
+                    findPickWithImage(fallbackCandidates)?.let {
+                        it.recommendationType = getString(R.string.recommendation_type_niche)
+                        curatedGames.add(it)
+                        it.appid?.let { id -> allSeenIds.add(id) }
+                    }
                 }
 
                 if (curatedGames.isNotEmpty()) {
@@ -186,8 +234,10 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
 
-            progressBar.visibility = View.GONE
-            recyclerView.adapter = CategoryAdapter(recommendations)
+            runOnUiThread {
+                progressBar.visibility = View.GONE
+                recyclerView.adapter = CategoryAdapter(recommendations)
+            }
         }
 
         searchTerms.forEach { term ->
@@ -195,7 +245,10 @@ class HomeActivity : AppCompatActivity() {
                 resultsMap[term] = games
                 completedCalls++
                 if (completedCalls == searchTerms.size) {
-                    processCuratedList()
+                    // Image verification involves network calls, so we run curation in a background thread
+                    Thread {
+                        processCuratedList()
+                    }.start()
                 }
             }
         }
