@@ -10,7 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class CategoryAdapter(
     private val categories: List<Category>,
-    private val topGenres: List<String> = emptyList()
+    private val topGenres: List<String> = emptyList(),
+    private val isRecommendation: Boolean = false
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -50,7 +51,7 @@ class CategoryAdapter(
             holder.title.setTextColor(Color.WHITE)
             holder.recycler.layoutManager =
                 LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
-            holder.recycler.adapter = GameAdapter(category.games)
+            holder.recycler.adapter = GameAdapter(category.games, isRecommendation = isRecommendation)
         } else if (holder is GenreStatsViewHolder) {
             val text = topGenres.mapIndexed { index, genre -> "${index + 1}. $genre" }
                 .joinToString("\n")

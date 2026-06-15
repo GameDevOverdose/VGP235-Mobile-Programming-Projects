@@ -151,6 +151,8 @@ class HomeActivity : AppCompatActivity() {
         val resultsMap = mutableMapOf<String, List<Game>>()
         var completedCalls = 0
 
+        recyclerView.adapter = CategoryAdapter(emptyList(), isRecommendation = true)
+
         /**
          * FEATURE: IMAGE VERIFICATION
          * If enabled, we verify that a game has a valid library poster on Steam servers before picking it.
@@ -236,7 +238,7 @@ class HomeActivity : AppCompatActivity() {
 
             runOnUiThread {
                 progressBar.visibility = View.GONE
-                recyclerView.adapter = CategoryAdapter(recommendations)
+                recyclerView.adapter = CategoryAdapter(recommendations, isRecommendation = true)
             }
         }
 
