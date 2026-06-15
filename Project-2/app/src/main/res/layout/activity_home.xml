@@ -12,17 +12,17 @@
         android:id="@+id/searchBarCard_id"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        app:cardBackgroundColor="#3d4450"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        app:cardBackgroundColor="#262C35"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp"
-        app:strokeWidth="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5">
+        app:layout_constraintVertical_bias="0.5"
+        app:strokeWidth="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,15 +41,15 @@
             <EditText
                 android:id="@+id/steamIdTextEdit_id"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="36dp"
                 android:background="@android:color/transparent"
                 android:fontFamily="@font/akatab"
-                android:hint="Enter Steam ID (17 digits)"
+                android:hint="Input Steam ID (17 digits)"
                 android:inputType="number"
                 android:paddingStart="12dp"
                 android:textColor="#FFFFFF"
-                android:textColorHint="#adadad"
-                android:textSize="16sp" />
+                android:textColorHint="#B4C8C8C8"
+                android:textSize="14sp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
