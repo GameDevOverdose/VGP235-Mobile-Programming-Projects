@@ -5,142 +5,186 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="	#292e37"
+    android:background="@drawable/main_gradient"
     tools:context=".HomeActivity">
 
-    <EditText
-        android:id="@+id/steamIdTextEdit_id"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/searchBarCard_id"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:ems="10"
-        android:fontFamily="@font/akatab"
-        android:hint="SteamId"
-        android:inputType="number"
-        android:textColor="#FFFFFF"
-        android:textColorHint="	#adadad"
+        app:cardBackgroundColor="#3d4450"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/playerHeaderLinearLayout_id"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="20dp"
-        android:background="	#171a21"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/steamIdTextEdit_id">
-
-        <ImageView
-            android:id="@+id/avatarImageView_id"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            tools:src="@tools:sample/avatars" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="#adadad" />
+
+            <EditText
+                android:id="@+id/steamIdTextEdit_id"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:fontFamily="@font/akatab"
+                android:hint="Enter Steam ID (17 digits)"
+                android:inputType="number"
+                android:paddingStart="12dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#adadad"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/playerHeaderCard_id"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#171a21"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchBarCard_id"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:id="@+id/playerHeaderLinearLayout_id"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/avatarImageView_id"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                tools:src="@tools:sample/avatars" />
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:orientation="vertical"
+                android:padding="8dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/nameTextView_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/akatab"
-                        android:text="Name: Loading..."
-                        android:textColor="#FFFFFF" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/countryTextView_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/akatab"
-                        android:text="Country: Loading..."
-                        android:textColor="#FFFFFF" />
+                        <TextView
+                            android:id="@+id/nameTextView_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/akatab"
+                            android:text="Name: Loading..."
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/countryTextView_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:fontFamily="@font/akatab"
+                            android:text="Country: Loading..."
+                            android:textColor="#adadad"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/gamesOwnedTextView_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/akatab"
+                            android:text="In Library: Loading..."
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/hoursPlayedTextView_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:fontFamily="@font/akatab"
+                            android:text="Total Hours: 0h"
+                            android:textColor="#adadad"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/gamesOwnedTextView_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/akatab"
-                        android:text="In Library: Loading..."
-                        android:textColor="#FFFFFF" />
-
-                    <TextView
-                        android:id="@+id/hoursPlayedTextView_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/akatab"
-                        android:text="Total Hours: 0h"
-                        android:textColor="#FFFFFF" />
-
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/recentlyPlayedTextView_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".25"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/akatab"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:maxLines="1"
+                    android:text="Recent: None"
+                    android:textColor="#66c0f4"
+                    android:textSize="11sp" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/recentlyPlayedTextView_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:fontFamily="@font/akatab"
-                android:gravity="center_vertical"
-                android:text="Recent: None"
-                android:textColor="#adadad"
-                android:textSize="11sp"
-                android:visibility="visible" />
-
         </LinearLayout>
-
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/playerDataRv_id"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
-        android:background="#232730"
+        android:background="@android:color/transparent"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/recommendGamesButton_id"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/playerHeaderLinearLayout_id">
+        app:layout_constraintTop_toBottomOf="@+id/playerHeaderCard_id">
 
     </androidx.recyclerview.widget.RecyclerView>
 

@@ -1,8 +1,14 @@
 package com.lasallecollegevancouver.myfinalapp
 
+import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.os.Bundle
+import android.transition.Fade
+import android.transition.Transition
+import android.transition.TransitionManager
+import android.transition.TransitionSet
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -21,6 +27,7 @@ class HomeActivity : AppCompatActivity() {
     private val repository = SteamRepository("8D4656FFBAD8F36CF251F84C01D40848")
     private var currentUserData: FullUserData? = null
     private var isShowingRecommendations = false
+    private var isSearchBarAtTop = false
 
     // --- ALGORITHM CONFIGURATION ---
     private object AlgoConfig {
@@ -55,6 +62,8 @@ class HomeActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_home)
 
+        val rootLayout = findViewById<ConstraintLayout>(R.id.root)
+        val searchBarCard = findViewById<View>(R.id.searchBarCard_id)
         val steamIdInput = findViewById<EditText>(R.id.steamIdTextEdit_id)
         val recommendButton = findViewById<Button>(R.id.recommendGamesButton_id)
         val recyclerView = findViewById<RecyclerView>(R.id.playerDataRv_id)
@@ -66,10 +75,17 @@ class HomeActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val steamId = s.toString().trim()
+                
+                if (steamId.isNotEmpty() && !isSearchBarAtTop) {
+                    animateSearchBarToTop(rootLayout, searchBarCard)
+                } else if (steamId.isEmpty() && isSearchBarAtTop) {
+                    animateSearchBarToCenter(rootLayout, searchBarCard)
+                }
+
                 if (steamId.length == 17) {
                     updateUI(steamId)
                 } else {
-                    findViewById<View>(R.id.playerHeaderLinearLayout_id).visibility = View.GONE
+                    findViewById<View>(R.id.playerHeaderCard_id).visibility = View.GONE
                     findViewById<RecyclerView>(R.id.playerDataRv_id).visibility = View.GONE
                     findViewById<Button>(R.id.recommendGamesButton_id).visibility = View.GONE
                 }
@@ -80,8 +96,38 @@ class HomeActivity : AppCompatActivity() {
             toggleRecommendations()
         }
 
-        // Initial load with a known Steam ID
+        // Search bar starts in center because of XML constraints.
+        // We don't call updateUI here so the user can see the splash-like centered search.
         updateUI("76561198314066783")
+    }
+
+    private fun animateSearchBarToTop(root: ConstraintLayout, card: View) {
+        isSearchBarAtTop = true
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(root)
+        
+        // Clear center constraints
+        constraintSet.clear(card.id, ConstraintSet.BOTTOM)
+        
+        // Set top constraint with margin
+        constraintSet.connect(card.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP, 150) // Adjust 150 for top padding
+        
+        TransitionManager.beginDelayedTransition(root)
+        constraintSet.applyTo(root)
+    }
+
+    private fun animateSearchBarToCenter(root: ConstraintLayout, card: View) {
+        isSearchBarAtTop = false
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(root)
+        
+        // Restore center constraints
+        constraintSet.connect(card.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP, 0)
+        constraintSet.connect(card.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM, 0)
+        constraintSet.setVerticalBias(card.id, 0.5f)
+        
+        TransitionManager.beginDelayedTransition(root)
+        constraintSet.applyTo(root)
     }
 
     private fun toggleRecommendations() {
@@ -286,58 +332,67 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateUI(steamId: String) {
+        val rootLayout = findViewById<ConstraintLayout>(R.id.root)
         val progressBar = findViewById<ProgressBar>(R.id.progressBar_id)
         val recommendButton = findViewById<Button>(R.id.recommendGamesButton_id)
-        val playerHeader = findViewById<View>(R.id.playerHeaderLinearLayout_id)
+        val playerHeaderCard = findViewById<View>(R.id.playerHeaderCard_id)
         val recyclerView = findViewById<RecyclerView>(R.id.playerDataRv_id)
         
         progressBar.visibility = View.VISIBLE
 
         repository.loadFullUserData(steamId) { data ->
-            currentUserData = data
-            isShowingRecommendations = false
-            recommendButton.text = "Start Recommendation"
-            progressBar.visibility = View.GONE
+            runOnUiThread {
+                progressBar.visibility = View.GONE
+                currentUserData = data
+                isShowingRecommendations = false
+                recommendButton.text = "Start Recommendation"
 
-            if (data.player == null) {
-                Toast.makeText(this, "User not found or profile is private", Toast.LENGTH_SHORT).show()
-                playerHeader.visibility = View.GONE
-                recyclerView.visibility = View.GONE
-                recommendButton.visibility = View.GONE
-                return@loadFullUserData
+                if (data.player == null) {
+                    Toast.makeText(this@HomeActivity, "User not found or profile is private", Toast.LENGTH_SHORT).show()
+                    playerHeaderCard.visibility = View.GONE
+                    recyclerView.visibility = View.GONE
+                    recommendButton.visibility = View.GONE
+                    return@runOnUiThread
+                }
+
+                val transition = TransitionSet().apply {
+                    addTransition(Fade())
+                    duration = 500
+                }
+                TransitionManager.beginDelayedTransition(rootLayout, transition)
+
+                // Show elements now that we have data
+                playerHeaderCard.visibility = View.VISIBLE
+                recyclerView.visibility = View.VISIBLE
+                recommendButton.visibility = View.VISIBLE
+
+                // Update Profile Info
+                findViewById<TextView>(R.id.nameTextView_id).text = "Name: ${data.player.personaname ?: "N/A"}"
+                findViewById<TextView>(R.id.countryTextView_id).text = "Country: ${data.player.loccountrycode ?: "N/A"}"
+                findViewById<ImageView>(R.id.avatarImageView_id).load(data.player.avatarfull) {
+                    crossfade(true)
+                    placeholder(android.R.drawable.progress_indeterminate_horizontal)
+                    error(android.R.drawable.stat_notify_error)
+                }
+
+                // Update Games Stats
+                val owned = data.ownedGames
+                findViewById<TextView>(R.id.gamesOwnedTextView_id).text = "Games Owned: ${owned?.game_count ?: 0}"
+                
+                val totalHours = (owned?.games?.sumOf { it.playtime_forever ?: 0 } ?: 0) / 60
+                findViewById<TextView>(R.id.hoursPlayedTextView_id).text = "Total Hours: ${totalHours}h"
+
+                // Update Recent Activity Summary Text
+                val recentNames = data.recentlyPlayed?.joinToString(", ") { it.name ?: "" }
+                findViewById<TextView>(R.id.recentlyPlayedTextView_id).text = "Recent: ${recentNames?.ifEmpty { "None" } ?: "None"}"
+
+                // Update Top Genres text in header
+                val topGenres = data.topGenres
+                findViewById<TextView>(R.id.topGenresTextView_id).text = "Top Genres: ${topGenres.ifEmpty { listOf("N/A") }.joinToString(", ")}"
+
+                // Show initial profile categories
+                showProfileCategories(data)
             }
-
-            // Show elements now that we have data
-            playerHeader.visibility = View.VISIBLE
-            recyclerView.visibility = View.VISIBLE
-            recommendButton.visibility = View.VISIBLE
-
-            // Update Profile Info
-            findViewById<TextView>(R.id.nameTextView_id).text = "Name: ${data.player.personaname ?: "N/A"}"
-            findViewById<TextView>(R.id.countryTextView_id).text = "Country: ${data.player.loccountrycode ?: "N/A"}"
-            findViewById<ImageView>(R.id.avatarImageView_id).load(data.player.avatarfull) {
-                crossfade(true)
-                placeholder(android.R.drawable.progress_indeterminate_horizontal)
-                error(android.R.drawable.stat_notify_error)
-            }
-
-            // Update Games Stats
-            val owned = data.ownedGames
-            findViewById<TextView>(R.id.gamesOwnedTextView_id).text = "Games Owned: ${owned?.game_count ?: 0}"
-            
-            val totalHours = (owned?.games?.sumOf { it.playtime_forever ?: 0 } ?: 0) / 60
-            findViewById<TextView>(R.id.hoursPlayedTextView_id).text = "Total Hours: ${totalHours}h"
-
-            // Update Recent Activity Summary Text
-            val recentNames = data.recentlyPlayed?.joinToString(", ") { it.name ?: "" }
-            findViewById<TextView>(R.id.recentlyPlayedTextView_id).text = "Recent: ${recentNames?.ifEmpty { "None" } ?: "None"}"
-
-            // Update Top Genres text in header
-            val topGenres = data.topGenres
-            findViewById<TextView>(R.id.topGenresTextView_id).text = "Top Genres: ${topGenres.ifEmpty { listOf("N/A") }.joinToString(", ")}"
-
-            // Show initial profile categories
-            showProfileCategories(data)
         }
     }
 }
