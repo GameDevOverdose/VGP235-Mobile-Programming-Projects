@@ -22,6 +22,7 @@ class GameAdapter(
         val image: ImageView = view.findViewById(R.id.gameImage)
         val overlay: ImageView = view.findViewById(R.id.gameOverlay)
         val typeBadge: TextView = view.findViewById(R.id.recommendationType)
+        val reviews: TextView = view.findViewById(R.id.gameReviews)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameViewHolder {
@@ -59,8 +60,16 @@ class GameAdapter(
         if (game.recommendationType != null) {
             holder.typeBadge.visibility = View.VISIBLE
             holder.typeBadge.text = game.recommendationType
+            
+            if (game.reviewCount > 0) {
+                holder.reviews.visibility = View.VISIBLE
+                holder.reviews.text = "${game.reviewScore}% (${game.reviewCount / 1000}k reviews)"
+            } else {
+                holder.reviews.visibility = View.GONE
+            }
         } else {
             holder.typeBadge.visibility = View.GONE
+            holder.reviews.visibility = View.GONE
         }
         
         if (game.appid != null && game.appid != 0) {

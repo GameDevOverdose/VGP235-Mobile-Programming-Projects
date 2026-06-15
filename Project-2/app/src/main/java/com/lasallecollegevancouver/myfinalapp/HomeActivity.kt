@@ -71,10 +71,15 @@ class HomeActivity : AppCompatActivity() {
         val rootLayout = findViewById<ConstraintLayout>(R.id.root)
         val searchBarCard = findViewById<View>(R.id.searchBarCard_id)
         val steamIdInput = findViewById<EditText>(R.id.steamIdTextEdit_id)
+        val clearSearchButton = findViewById<ImageView>(R.id.clearSearch_id)
         val recommendButton = findViewById<Button>(R.id.recommendGamesButton_id)
         val recyclerView = findViewById<RecyclerView>(R.id.playerDataRv_id)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        clearSearchButton.setOnClickListener {
+            steamIdInput.text.clear()
+        }
 
         steamIdInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -82,6 +87,8 @@ class HomeActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 val steamId = s.toString().trim()
                 
+                clearSearchButton.visibility = if (steamId.isNotEmpty()) View.VISIBLE else View.GONE
+
                 if (steamId.isNotEmpty() && !isSearchBarAtTop) {
                     animateSearchBarToTop(rootLayout, searchBarCard)
                 } else if (steamId.isEmpty() && isSearchBarAtTop) {
@@ -89,6 +96,7 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 if (steamId.length == 17) {
+                    hideKeyboard()
                     updateUI(steamId)
                 } else {
                     findViewById<View>(R.id.playerHeaderCard_id).visibility = View.GONE
@@ -149,9 +157,24 @@ class HomeActivity : AppCompatActivity() {
         constraintSet.applyTo(root)
     }
 
+    private fun hideKeyboard() {
+        val view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
+
     private fun toggleRecommendations() {
         val data = currentUserData ?: return
         val recommendButton = findViewById<Button>(R.id.recommendGamesButton_id)
+        val rootLayout = findViewById<ConstraintLayout>(R.id.root)
+
+        val transition = TransitionSet().apply {
+            addTransition(Fade())
+            duration = 400
+        }
+        TransitionManager.beginDelayedTransition(rootLayout, transition)
 
         if (isShowingRecommendations) {
             isShowingRecommendations = false
@@ -235,7 +258,9 @@ class HomeActivity : AppCompatActivity() {
                         if (!AlgoConfig.verifyImagesEnabled || repository.hasLibraryImage(game.appid)) {
                             game.appid?.let { allSeenIds.add(it) }
                             game.recommendationType = type
-                            curatedGames.add(game)
+                            // Keep the original review data for display
+                            val gameWithStats = game.copy()
+                            curatedGames.add(gameWithStats)
                             return true
                         } else {
                             game.appid?.let { failedImageIds.add(it) }
@@ -256,7 +281,8 @@ class HomeActivity : AppCompatActivity() {
                         if (!AlgoConfig.verifyImagesEnabled || repository.hasLibraryImage(game.appid)) {
                             game.appid?.let { allSeenIds.add(it) }
                             game.recommendationType = type
-                            curatedGames.add(game)
+                            val gameWithStats = game.copy()
+                            curatedGames.add(gameWithStats)
                         } else {
                             game.appid?.let { failedImageIds.add(it) }
                         }
@@ -386,8 +412,8 @@ class HomeActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.nameTextView_id).text = "Name: ${data.player.personaname ?: "N/A"}"
                 findViewById<TextView>(R.id.countryTextView_id).text = "Country: ${data.player.loccountrycode ?: "N/A"}"
                 findViewById<ImageView>(R.id.avatarImageView_id).load(data.player.avatarfull) {
-                    crossfade(true)
-                    placeholder(android.R.drawable.progress_indeterminate_horizontal)
+                    crossfade(500)
+                    placeholder(R.drawable.image_placeholder)
                     error(android.R.drawable.stat_notify_error)
                 }
 
@@ -401,10 +427,6 @@ class HomeActivity : AppCompatActivity() {
                 // Update Recent Activity Summary Text
                 val recentNames = data.recentlyPlayed?.joinToString(", ") { it.name ?: "" }
                 findViewById<TextView>(R.id.recentlyPlayedTextView_id).text = "Recent: ${recentNames?.ifEmpty { "None" } ?: "None"}"
-
-                // Update Top Genres text in header
-                val topGenres = data.topGenres
-                findViewById<TextView>(R.id.topGenresTextView_id).text = "Top Genres: ${topGenres.ifEmpty { listOf("N/A") }.joinToString(", ")}"
 
                 // Show initial profile categories
                 showProfileCategories(data)

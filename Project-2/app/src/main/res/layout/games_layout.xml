@@ -2,20 +2,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:paddingStart="16dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp">
 
     <TextView
         android:id="@+id/categoryTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/akatab"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
+        android:textAllCaps="true"
+        android:letterSpacing="0.1"
+        android:textColor="#66c0f4"
+        android:textSize="14sp"
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/horizontalRecycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clipToPadding="false"
         android:paddingTop="8dp" />
 </LinearLayout>
