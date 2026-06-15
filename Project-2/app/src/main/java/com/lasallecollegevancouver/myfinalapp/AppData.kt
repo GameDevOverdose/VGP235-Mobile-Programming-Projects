@@ -30,6 +30,8 @@ data class Game(
     val img_icon_url: String? = null,
     val imageRes: Int = 0,
     var recommendationType: String? = null,
+    var reviewCount: Int = 0,
+    var reviewScore: Int = 0,
     var selectionState: Int = 0 // 0: default, 1: plus, 2: minus
 )
 

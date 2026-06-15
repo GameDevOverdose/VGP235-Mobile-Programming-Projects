@@ -115,13 +115,18 @@ class SteamRepository(private val apiKey: String) {
 
     /**
      * Searches for games on the Steam Store by a specific genre or tag.
+     * @param sortBy can be "relevance" (default) or "Reviews_DESC" for popularity.
      */
-    fun searchGamesByGenre(genre: String, isNiche: Boolean = false, onResult: (List<Game>) -> Unit) {
+    fun searchGamesByGenre(
+        genre: String, 
+        isNiche: Boolean = false, 
+        sortBy: String = "relevance",
+        onResult: (List<Game>) -> Unit
+    ) {
         Thread {
             try {
-                // For Niche picks, we sometimes want to narrow down the search to high-quality tags
                 val searchTerm = if (isNiche) "$genre+masterpiece" else genre.replace(" ", "+")
-                val url = "https://store.steampowered.com/search/?term=$searchTerm&category1=998"
+                val url = "https://store.steampowered.com/search/?term=$searchTerm&category1=998&sort_by=$sortBy"
                 
                 val doc = Jsoup.connect(url).get()
                 val searchResults = doc.select(".search_result_row")
@@ -139,16 +144,13 @@ class SteamRepository(private val apiKey: String) {
                     val score = scoreMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
                     val count = countMatch?.groupValues?.get(1)?.replace(",", "")?.toIntOrNull() ?: 0
                     
-                    // Quality threshold: At least 70% positive for general search, 
-                    // but we'll refine further in HomeActivity.
-                    val isAcceptable = score >= 70 && (reviewTooltip.contains("Positive") || 
-                                       reviewTooltip.contains("Very Positive") || 
-                                       reviewTooltip.contains("Overwhelmingly Positive"))
-                    
-                    if (appId != null && name.isNotEmpty() && isAcceptable) {
+                    // Basic sanity check to avoid completely broken data
+                    if (appId != null && name.isNotEmpty()) {
                         Game(
                             appid = appId, 
-                            name = name
+                            name = name,
+                            reviewCount = count,
+                            reviewScore = score
                         )
                     } else null
                 }

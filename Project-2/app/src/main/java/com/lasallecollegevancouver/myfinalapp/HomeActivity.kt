@@ -22,23 +22,32 @@ class HomeActivity : AppCompatActivity() {
     private var currentUserData: FullUserData? = null
     private var isShowingRecommendations = false
 
+    // --- ALGORITHM CONFIGURATION ---
+    private object AlgoConfig {
+        const val minReviewCount = 500
+        const val minReviewScore = 70
+        const val verifyImagesEnabled = true
+        const val strategiesPerGenre = 3
+        const val hiddenGemScoreThreshold = 85
+        const val blockbusterReviewThreshold = 5000
+        const val maxGenresNoSelection = 3
+        const val maxGenresWithSelection = 3
+    }
+
     private val adjacentTags = mapOf(
-        "RPG" to "Action RPG",
-        "Action" to "Adventure",
-        "Shooter" to "FPS",
-        "Strategy" to "Turn-Based Strategy",
-        "Indie" to "Roguelike",
-        "Simulation" to "Management",
-        "Adventure" to "Story Rich",
-        "Horror" to "Psychological Horror",
-        "Psychological Horror" to "Atmospheric",
-        "Platformer" to "Precision Platformer",
-        "Survival" to "Open World Survival Craft",
-        "Co-op" to "Online Co-Op",
-        "Puzzle" to "Logic",
-        "Racing" to "Automobile Sim",
-        "Sports" to "Football",
-        "Sandbox" to "Open World"
+        "RPG" to listOf("Action RPG", "JRPG", "Open World RPG", "CRPG"),
+        "Action" to listOf("Adventure", "Hack and Slash", "Shooter", "Platformer"),
+        "Shooter" to listOf("FPS", "Third-Person Shooter", "Hero Shooter", "Tactical Shooter"),
+        "Strategy" to listOf("Turn-Based Strategy", "RTS", "Grand Strategy", "Tower Defense"),
+        "Indie" to listOf("Roguelike", "Metroidvania", "Puzzle", "Casual"),
+        "Simulation" to listOf("Management", "Life Sim", "City Builder", "Farming Sim"),
+        "Adventure" to listOf("Story Rich", "Point & Click", "Visual Novel", "Atmospheric"),
+        "Horror" to listOf("Psychological Horror", "Survival Horror", "Atmospheric", "Dark"),
+        "Platformer" to listOf("Precision Platformer", "2D Platformer", "3D Platformer", "Metroidvania"),
+        "Survival" to listOf("Open World Survival Craft", "Survival Horror", "Crafting", "Exploration"),
+        "Puzzle" to listOf("Logic", "Minimalist", "First-Person Puzzle"),
+        "Racing" to listOf("Automobile Sim", "Arcade Racer", "Sim Racing"),
+        "Sports" to listOf("Football", "Basketball", "Skating")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,120 +124,111 @@ class HomeActivity : AppCompatActivity() {
         val progressBar = findViewById<ProgressBar>(R.id.progressBar_id)
         val recyclerView = findViewById<RecyclerView>(R.id.playerDataRv_id)
         progressBar.visibility = View.VISIBLE
-        recyclerView.adapter = CategoryAdapter(emptyList())
+        recyclerView.adapter = CategoryAdapter(emptyList(), isRecommendation = true)
 
         val ownedAppIds = data.ownedGames?.games?.mapNotNull { it.appid }?.toSet() ?: emptySet()
 
         val selectedGenres = if (plusTags.isEmpty() && minusTags.isEmpty()) {
-            // Default logic: Pick 3 random genres from top 6, maintaining original relative order
-            val randomSubset = data.topGenres.take(6).shuffled().take(3).toSet()
+            val randomSubset = data.topGenres.take(6).shuffled().take(AlgoConfig.maxGenresNoSelection).toSet()
             data.topGenres.filter { it in randomSubset }
         } else {
-            // Filtered logic:
-            // 1. Start with a random mix of top genres (base variety)
             val initialDna = data.topGenres.take(6).shuffled().take(4).toMutableList()
-            // 2. Add plus tags with high priority
             val enhancedDna = (plusTags.take(8) + initialDna).distinct()
-            // 3. Remove minus tags and limit
             enhancedDna.filter { tag ->
                 minusTags.none { it.equals(tag, ignoreCase = true) }
-            }.take(6)
+            }.take(AlgoConfig.maxGenresWithSelection)
         }
 
         if (selectedGenres.isEmpty()) {
             progressBar.visibility = View.GONE
-            Toast.makeText(this, "No matching genres found with your filters!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "No matching genres found!", Toast.LENGTH_LONG).show()
             return
         }
 
-        // Collect all necessary search terms
-        val searchTerms = mutableSetOf<String>()
-        selectedGenres.forEach { genre ->
-            searchTerms.add(genre)
-            adjacentTags[genre]?.let { searchTerms.add(it) }
-        }
-
-        val resultsMap = mutableMapOf<String, List<Game>>()
+        val resultsRelevance = mutableMapOf<String, List<Game>>()
+        val resultsPopularity = mutableMapOf<String, List<Game>>()
+        val resultsDiscovery = mutableMapOf<String, List<Game>>()
         var completedCalls = 0
-
-        recyclerView.adapter = CategoryAdapter(emptyList(), isRecommendation = true)
-
-        /**
-         * FEATURE: IMAGE VERIFICATION
-         * If enabled, we verify that a game has a valid library poster on Steam servers before picking it.
-         * To disable this feature, simply set 'verifyImagesEnabled' to false.
-         */
-        val verifyImagesEnabled = true
-
-        fun findPickWithImage(candidates: List<Game>): Game? {
-            if (verifyImagesEnabled) {
-                // Return the first candidate that actually has an image
-                val verified = candidates.firstOrNull { repository.hasLibraryImage(it.appid) }
-                if (verified != null) return verified
-            }
-            // Fallback to the first one if feature is disabled or no verified images found
-            return candidates.firstOrNull()
-        }
+        val totalExpectedCalls = selectedGenres.size * 3
 
         fun processCuratedList() {
             val allSeenIds = ownedAppIds.toMutableSet()
+            val failedImageIds = mutableSetOf<Int>()
             val recommendations = mutableListOf<Category>()
 
             selectedGenres.forEach { genre ->
-                val adjacentTag = adjacentTags[genre] ?: genre
-                val genreGames = resultsMap[genre] ?: emptyList()
-                val adjacentGames = resultsMap[adjacentTag] ?: emptyList()
-
+                val relevancePool = resultsRelevance[genre] ?: emptyList()
+                val popularityPool = resultsPopularity[genre] ?: emptyList()
+                val discoveryPool = resultsDiscovery[genre] ?: emptyList()
                 val curatedGames = mutableListOf<Game>()
 
-                // 1. Popular Pick: Randomly pick one from the top 10 most relevant hits
-                val popularCandidates = genreGames
-                    .filter { it.appid !in allSeenIds }
-                    .take(10)
-                    .shuffled()
-                
-                findPickWithImage(popularCandidates)?.let {
-                    it.recommendationType = getString(R.string.recommendation_type_popular)
-                    curatedGames.add(it)
-                    it.appid?.let { id -> allSeenIds.add(id) }
-                }
+                // Helper to pick a single game matching criteria
+                fun tryPickOne(pool: List<Game>, type: String, sMin: Int = 0, cMin: Int = 0, sMax: Int = 100, cMax: Int = Int.MAX_VALUE): Boolean {
+                    val candidates = pool.filter { 
+                        it.appid !in allSeenIds && it.appid !in failedImageIds &&
+                        it.reviewScore in sMin..sMax && it.reviewCount in cMin..cMax
+                    }.shuffled()
 
-                // 2. Adjacent Pick: Randomly pick one from the top 15 related matches
-                val adjacentCandidates = adjacentGames
-                    .filter { it.appid !in allSeenIds }
-                    .take(15)
-                    .shuffled()
-
-                findPickWithImage(adjacentCandidates)?.let {
-                    it.recommendationType = getString(R.string.recommendation_type_adjacent)
-                    curatedGames.add(it)
-                    it.appid?.let { id -> allSeenIds.add(id) }
-                }
-
-                // 3. Niche Pick (Hidden Gem): Randomly pick from all matching titles
-                val nicheCandidates = genreGames
-                    .filter { it.appid !in allSeenIds }
-                    .shuffled()
-
-                findPickWithImage(nicheCandidates)?.let {
-                    it.recommendationType = getString(R.string.recommendation_type_niche)
-                    curatedGames.add(it)
-                    it.appid?.let { id -> allSeenIds.add(id) }
-                }
-                
-                // Fallback for Niche: Pick randomly from a deeper pool
-                if (curatedGames.size < 3) {
-                    val fallbackCandidates = genreGames
-                        .filter { it.appid !in allSeenIds }
-                        .drop(5)
-                        .take(20)
-                        .shuffled()
-
-                    findPickWithImage(fallbackCandidates)?.let {
-                        it.recommendationType = getString(R.string.recommendation_type_niche)
-                        curatedGames.add(it)
-                        it.appid?.let { id -> allSeenIds.add(id) }
+                    for (game in candidates) {
+                        if (!AlgoConfig.verifyImagesEnabled || repository.hasLibraryImage(game.appid)) {
+                            game.appid?.let { allSeenIds.add(it) }
+                            game.recommendationType = type
+                            curatedGames.add(game)
+                            return true
+                        } else {
+                            game.appid?.let { failedImageIds.add(it) }
+                        }
                     }
+                    return false
+                }
+
+                // Helper to fill remaining slots with less restriction
+                fun fillRemaining(pool: List<Game>, type: String, sMin: Int = 0, cMin: Int = 0) {
+                    val candidates = pool.filter { 
+                        it.appid !in allSeenIds && it.appid !in failedImageIds &&
+                        it.reviewScore >= sMin && it.reviewCount >= cMin
+                    }.distinctBy { it.appid }.shuffled()
+
+                    for (game in candidates) {
+                        if (curatedGames.size >= AlgoConfig.strategiesPerGenre) break
+                        if (!AlgoConfig.verifyImagesEnabled || repository.hasLibraryImage(game.appid)) {
+                            game.appid?.let { allSeenIds.add(it) }
+                            game.recommendationType = type
+                            curatedGames.add(game)
+                        } else {
+                            game.appid?.let { failedImageIds.add(it) }
+                        }
+                    }
+                }
+
+                // 1. Primary Strategy Pass (Try to get diverse types)
+                val strategyFunctions = listOf(
+                    { tryPickOne(popularityPool, "Blockbuster", cMin = AlgoConfig.blockbusterReviewThreshold) },
+                    { tryPickOne(relevancePool, "Genre Staple", sMin = AlgoConfig.minReviewScore, cMin = AlgoConfig.minReviewCount) },
+                    { tryPickOne(relevancePool, "Hidden Gem", sMin = AlgoConfig.hiddenGemScoreThreshold, cMax = AlgoConfig.blockbusterReviewThreshold) },
+                    { tryPickOne(popularityPool, "Cult Favorite", sMin = 90) },
+                    { tryPickOne(relevancePool, "Rising Star", cMin = 500, cMax = 2000) },
+                    { tryPickOne(discoveryPool, "Discovery", sMin = AlgoConfig.minReviewScore, cMin = AlgoConfig.minReviewCount) }
+                ).shuffled()
+
+                for (strategy in strategyFunctions) {
+                    if (curatedGames.size >= AlgoConfig.strategiesPerGenre) break
+                    strategy()
+                }
+
+                // 2. Safety Fallback: Relaxed Quality (Ensures density if strategies fail)
+                if (curatedGames.size < AlgoConfig.strategiesPerGenre) {
+                    fillRemaining(relevancePool + popularityPool + discoveryPool, "Highly Rated", sMin = AlgoConfig.minReviewScore, cMin = AlgoConfig.minReviewCount)
+                }
+
+                // 3. Desperation Fallback: Lower Score Threshold
+                if (curatedGames.size < AlgoConfig.strategiesPerGenre) {
+                    fillRemaining(relevancePool + popularityPool + discoveryPool, "Community Pick", sMin = 60, cMin = 100)
+                }
+
+                // 4. Final Fallback: Absolute Any (Last resort to guarantee 3 picks)
+                if (curatedGames.size < AlgoConfig.strategiesPerGenre) {
+                    fillRemaining(relevancePool + popularityPool + discoveryPool, "Wildcard", sMin = 0, cMin = 0)
                 }
 
                 if (curatedGames.isNotEmpty()) {
@@ -242,15 +242,30 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        searchTerms.forEach { term ->
-            repository.searchGamesByGenre(term) { games ->
-                resultsMap[term] = games
-                completedCalls++
-                if (completedCalls == searchTerms.size) {
-                    // Image verification involves network calls, so we run curation in a background thread
-                    Thread {
-                        processCuratedList()
-                    }.start()
+        selectedGenres.forEach { genre ->
+            repository.searchGamesByGenre(genre, sortBy = "relevance") { games ->
+                synchronized(resultsRelevance) {
+                    resultsRelevance[genre] = games
+                    completedCalls++
+                    if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+                }
+            }
+            repository.searchGamesByGenre(genre, sortBy = "Reviews_DESC") { games ->
+                synchronized(resultsRelevance) {
+                    resultsPopularity[genre] = games
+                    completedCalls++
+                    if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+                }
+            }
+            
+            // Discovery search using adjacent tags
+            val adjacent = adjacentTags[genre] ?: emptyList()
+            val discoveryTag = adjacent.shuffled().firstOrNull() ?: genre
+            repository.searchGamesByGenre(discoveryTag, sortBy = "relevance") { games ->
+                synchronized(resultsRelevance) {
+                    resultsDiscovery[genre] = games
+                    completedCalls++
+                    if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
                 }
             }
         }
