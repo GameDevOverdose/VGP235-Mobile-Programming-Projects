@@ -69,8 +69,8 @@ class GameAdapter(
             val capsuleVertical = "https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/capsule_231x350.jpg"
 
             holder.image.load(library2x) {
-                crossfade(true)
-                placeholder(android.R.drawable.progress_indeterminate_horizontal)
+                crossfade(500)
+                placeholder(R.drawable.image_placeholder)
                 error(R.drawable.missing_game_poster)
                 
                 listener(onError = { _, _ ->

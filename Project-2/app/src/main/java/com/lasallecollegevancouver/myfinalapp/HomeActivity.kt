@@ -31,7 +31,7 @@ class HomeActivity : AppCompatActivity() {
 
     // --- ALGORITHM CONFIGURATION ---
     private object AlgoConfig {
-        const val minReviewCount = 500
+        const val minReviewCount = 1000
         const val minReviewScore = 70
         const val verifyImagesEnabled = true
         const val strategiesPerGenre = 3
