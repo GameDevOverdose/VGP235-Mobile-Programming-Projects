@@ -41,6 +41,12 @@ class HomeActivity : AppCompatActivity() {
         const val maxGenresWithSelection = 3
     }
 
+    // --- UI CONFIGURATION ---
+    private object UIConfig {
+        const val useGradient = true
+        const val useShadows = true
+    }
+
     private val adjacentTags = mapOf(
         "RPG" to listOf("Action RPG", "JRPG", "Open World RPG", "CRPG"),
         "Action" to listOf("Adventure", "Hack and Slash", "Shooter", "Platformer"),
@@ -96,9 +102,22 @@ class HomeActivity : AppCompatActivity() {
             toggleRecommendations()
         }
 
+        applyUIConfig(rootLayout, searchBarCard)
+
         // Search bar starts in center because of XML constraints.
         // We don't call updateUI here so the user can see the splash-like centered search.
-        updateUI("76561198314066783")
+        //updateUI("76561198314066783")
+    }
+
+    private fun applyUIConfig(root: View, searchBar: View) {
+        if (!UIConfig.useGradient) {
+            root.setBackgroundColor(android.graphics.Color.parseColor("#292e37"))
+        }
+        
+        if (!UIConfig.useShadows) {
+            (searchBar as? com.google.android.material.card.MaterialCardView)?.cardElevation = 0f
+            findViewById<com.google.android.material.card.MaterialCardView>(R.id.playerHeaderCard_id).cardElevation = 0f
+        }
     }
 
     private fun animateSearchBarToTop(root: ConstraintLayout, card: View) {
@@ -133,17 +152,14 @@ class HomeActivity : AppCompatActivity() {
     private fun toggleRecommendations() {
         val data = currentUserData ?: return
         val recommendButton = findViewById<Button>(R.id.recommendGamesButton_id)
-        val topGenresText = findViewById<TextView>(R.id.topGenresTextView_id)
 
         if (isShowingRecommendations) {
             isShowingRecommendations = false
             recommendButton.text = "Start Recommendation"
-            topGenresText.visibility = View.VISIBLE
             showProfileCategories(data)
         } else {
             isShowingRecommendations = true
             recommendButton.text = "Back to Profile"
-            topGenresText.visibility = View.GONE
             
             // Collect selections
             val allGames = (data.ownedGames?.games ?: emptyList()) + (data.recentlyPlayed ?: emptyList())
