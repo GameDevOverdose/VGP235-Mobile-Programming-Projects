@@ -2,5 +2,9 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
         <item>@font/akatab</item>
+        <item>@font/inter</item>
+        <item>@font/inter_medium</item>
+        <item>@font/sora</item>
+        <item>@font/sora_light</item>
     </array>
 </resources>

@@ -32,7 +32,8 @@ data class Game(
     var recommendationType: String? = null,
     var reviewCount: Int = 0,
     var reviewScore: Int = 0,
-    var selectionState: Int = 0 // 0: default, 1: plus, 2: minus
+    var selectionState: Int = 0, // 0: default, 1: plus, 2: minus
+    var fallbackImageUrl: String? = null
 )
 
 data class RecentlyPlayedResponse(val response: RecentlyPlayedContainer)

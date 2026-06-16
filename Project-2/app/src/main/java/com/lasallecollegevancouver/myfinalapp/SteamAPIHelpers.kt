@@ -98,16 +98,24 @@ class SteamRepository(private val apiKey: String) {
      */
     fun hasLibraryImage(appId: Int?): Boolean {
         if (appId == null) return false
+        val urls = mutableListOf<String>()
+        if (HomeActivity.AlgoConfig.useLibrary2xFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900_2x.jpg")
+        if (HomeActivity.AlgoConfig.useLibrary1xFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900.jpg")
+        if (HomeActivity.AlgoConfig.useCapsuleFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/capsule_231x350.jpg")
+        
+        if (urls.isEmpty()) return true // If no specific fallbacks are checked, assume okay or bypass
+
         return try {
-            // Using the standard library poster URL
-            val url = "https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900.jpg"
-            val response = Jsoup.connect(url)
-                .ignoreContentType(true)
-                .ignoreHttpErrors(true)
-                .method(org.jsoup.Connection.Method.HEAD)
-                .timeout(2000)
-                .execute()
-            response.statusCode() == 200
+            for (url in urls) {
+                val response = Jsoup.connect(url)
+                    .ignoreContentType(true)
+                    .ignoreHttpErrors(true)
+                    .method(org.jsoup.Connection.Method.HEAD)
+                    .timeout(2000)
+                    .execute()
+                if (response.statusCode() == 200) return true
+            }
+            false
         } catch (e: Exception) {
             false
         }
@@ -146,12 +154,16 @@ class SteamRepository(private val apiKey: String) {
                     
                     // Basic sanity check to avoid completely broken data
                     if (appId != null && name.isNotEmpty()) {
-                        Game(
+                        val game = Game(
                             appid = appId, 
                             name = name,
                             reviewCount = count,
                             reviewScore = score
                         )
+                        // Scrape the image from the search results if available
+                        val imgElement = element.select(".search_capsule img")
+                        game.fallbackImageUrl = imgElement.attr("src")
+                        game
                     } else null
                 }
                 
@@ -286,6 +298,10 @@ class SteamRepository(private val apiKey: String) {
                             val doc = Jsoup.connect(url)
                                 .cookie("birthtime", "283993201") // Bypass age verification
                                 .get()
+                            
+                            // Extract fallback image URL (og:image is the standard)
+                            game.fallbackImageUrl = doc.select("meta[property=og:image]").attr("content")
+                            
                             val tags = doc.select(".app_tag").map { it.text().trim() }
                             
                             Log.d("SteamDebug", "Processing tags for ${game.name ?: appId}: $tags")
@@ -344,6 +360,10 @@ class SteamRepository(private val apiKey: String) {
                             val doc = Jsoup.connect(url)
                                 .cookie("birthtime", "283993201")
                                 .get()
+                            
+                            // Extract fallback image URL
+                            game.fallbackImageUrl = doc.select("meta[property=og:image]").attr("content")
+
                             val tags = doc.select(".app_tag").map { it.text().trim() }
                             tags.forEach { tag ->
                                 if (tag.isNotEmpty() && tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {

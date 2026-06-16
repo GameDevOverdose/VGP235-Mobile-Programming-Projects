@@ -79,25 +79,44 @@ class GameAdapter(
         }
         
         if (game.appid != null && game.appid != 0) {
-            val library2x = "https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900_2x.jpg"
-            val library1x = "https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900.jpg"
-            val capsuleVertical = "https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/capsule_231x350.jpg"
-
-            holder.image.load(library2x) {
-                crossfade(500)
-                placeholder(R.drawable.image_placeholder)
-                error(R.drawable.missing_game_poster)
-                
-                listener(onError = { _, _ ->
-                    holder.image.load(library1x) {
-                        listener(onError = { _, _ ->
-                            holder.image.load(capsuleVertical) {
-                                error(R.drawable.missing_game_poster)
-                            }
-                        })
-                    }
-                })
+            val urls = mutableListOf<String>()
+            
+            if (HomeActivity.AlgoConfig.useLibrary2xFallback) {
+                urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900_2x.jpg")
             }
+            if (HomeActivity.AlgoConfig.useLibrary1xFallback) {
+                urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900.jpg")
+            }
+            if (HomeActivity.AlgoConfig.useCapsuleFallback) {
+                urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/capsule_231x350.jpg")
+            }
+            if (HomeActivity.AlgoConfig.useHeaderFallback) {
+                urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg")
+            }
+            if (HomeActivity.AlgoConfig.useScrapedFallback && !game.fallbackImageUrl.isNullOrEmpty()) {
+                urls.add(game.fallbackImageUrl!!)
+            }
+
+            fun loadWithFallbacks(index: Int) {
+                if (index >= urls.size) {
+                    holder.image.load(R.drawable.missing_game_poster)
+                    return
+                }
+
+                holder.image.load(urls[index]) {
+                    // Only use placeholder/crossfade for the first attempt to prevent flickering
+                    if (index == 0) {
+                        placeholder(R.drawable.image_placeholder)
+                        crossfade(500)
+                    }
+                    
+                    listener(onError = { _, _ ->
+                        loadWithFallbacks(index + 1)
+                    })
+                }
+            }
+
+            loadWithFallbacks(0)
         } else if (game.imageRes != 0) {
             holder.image.setImageResource(game.imageRes)
         }

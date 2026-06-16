@@ -30,10 +30,15 @@ class HomeActivity : AppCompatActivity() {
     private var isSearchBarAtTop = false
 
     // --- ALGORITHM CONFIGURATION ---
-    private object AlgoConfig {
+    object AlgoConfig {
         const val minReviewCount = 1000
         const val minReviewScore = 70
         const val verifyImagesEnabled = true
+        const val useLibrary2xFallback = false
+        const val useLibrary1xFallback = true
+        const val useCapsuleFallback = false
+        const val useHeaderFallback = true
+        const val useScrapedFallback = false
         const val strategiesPerGenre = 3
         const val hiddenGemScoreThreshold = 85
         const val blockbusterReviewThreshold = 5000
@@ -43,8 +48,8 @@ class HomeActivity : AppCompatActivity() {
 
     // --- UI CONFIGURATION ---
     private object UIConfig {
-        const val useGradient = true
-        const val useShadows = true
+        const val useGradient = false
+        const val useShadows = false
     }
 
     private val adjacentTags = mapOf(
@@ -255,10 +260,16 @@ class HomeActivity : AppCompatActivity() {
                     }.shuffled()
 
                     for (game in candidates) {
-                        if (!AlgoConfig.verifyImagesEnabled || repository.hasLibraryImage(game.appid)) {
+                        val hasValidImage = !AlgoConfig.verifyImagesEnabled || 
+                                           (AlgoConfig.useLibrary2xFallback && repository.hasLibraryImage(game.appid)) || 
+                                           (AlgoConfig.useLibrary1xFallback && repository.hasLibraryImage(game.appid)) || 
+                                           (AlgoConfig.useCapsuleFallback && repository.hasLibraryImage(game.appid)) || 
+                                           AlgoConfig.useHeaderFallback || 
+                                           (AlgoConfig.useScrapedFallback && game.fallbackImageUrl != null)
+
+                        if (hasValidImage) {
                             game.appid?.let { allSeenIds.add(it) }
                             game.recommendationType = type
-                            // Keep the original review data for display
                             val gameWithStats = game.copy()
                             curatedGames.add(gameWithStats)
                             return true
@@ -278,7 +289,15 @@ class HomeActivity : AppCompatActivity() {
 
                     for (game in candidates) {
                         if (curatedGames.size >= AlgoConfig.strategiesPerGenre) break
-                        if (!AlgoConfig.verifyImagesEnabled || repository.hasLibraryImage(game.appid)) {
+                        
+                        val hasValidImage = !AlgoConfig.verifyImagesEnabled || 
+                                           (AlgoConfig.useLibrary2xFallback && repository.hasLibraryImage(game.appid)) || 
+                                           (AlgoConfig.useLibrary1xFallback && repository.hasLibraryImage(game.appid)) || 
+                                           (AlgoConfig.useCapsuleFallback && repository.hasLibraryImage(game.appid)) ||
+                                           AlgoConfig.useHeaderFallback || 
+                                           (AlgoConfig.useScrapedFallback && game.fallbackImageUrl != null)
+
+                        if (hasValidImage) {
                             game.appid?.let { allSeenIds.add(it) }
                             game.recommendationType = type
                             val gameWithStats = game.copy()
