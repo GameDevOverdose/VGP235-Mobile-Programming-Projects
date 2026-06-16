@@ -48,8 +48,8 @@ class HomeActivity : AppCompatActivity() {
 
     // --- UI CONFIGURATION ---
     private object UIConfig {
-        const val useGradient = false
-        const val useShadows = false
+        const val useGradient = true
+        const val useShadows = true
     }
 
     private val adjacentTags = mapOf(
