@@ -5,13 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class CategoryAdapter(
     private val categories: List<Category>,
     private val topGenres: List<String> = emptyList(),
-    private val isRecommendation: Boolean = false
+    private val isRecommendation: Boolean = false,
+    private val useGrid: Boolean = isRecommendation
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -47,11 +49,16 @@ class CategoryAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is CategoryViewHolder) {
             val category = categories[position]
-            holder.title.text = category.title
+            holder.title.text = if (isRecommendation) "${category.title} Picks" else category.title
             holder.title.setTextColor(Color.WHITE)
-            holder.recycler.layoutManager =
-                LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
-            holder.recycler.adapter = GameAdapter(category.games, isRecommendation = isRecommendation)
+            
+            if (useGrid) {
+                holder.recycler.layoutManager = GridLayoutManager(holder.itemView.context, 3)
+            } else {
+                holder.recycler.layoutManager =
+                    LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
+            }
+            holder.recycler.adapter = GameAdapter(category.games, isRecommendation = isRecommendation, useGrid = useGrid)
         } else if (holder is GenreStatsViewHolder) {
             val text = topGenres.mapIndexed { index, genre -> "${index + 1}. $genre" }
                 .joinToString("\n")

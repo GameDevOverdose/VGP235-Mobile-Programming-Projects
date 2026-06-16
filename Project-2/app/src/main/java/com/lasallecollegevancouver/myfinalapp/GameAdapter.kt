@@ -13,6 +13,7 @@ import coil.load
 class GameAdapter(
     private val games: List<Game>,
     private val isRecommendation: Boolean = false,
+    private val useGrid: Boolean = isRecommendation,
     private val onSelectionChanged: (Game) -> Unit = {}
 ) :
     RecyclerView.Adapter<GameAdapter.GameViewHolder>() {
@@ -28,6 +29,11 @@ class GameAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_game, parent, false)
+            
+        if (useGrid) {
+            view.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+        }
+
         return GameViewHolder(view)
     }
 
