@@ -76,33 +76,15 @@ interface SteamStoreApiService {
 
 class SteamRepository(private val apiKey: String) {
 
-    private val tagBlacklist = arrayOf(
-        "In-App Purchases", "Multi-player", "Free to Play",
-        "Sexual Content", "Nudity", "+", "Indie", "Early Access",
-        "Singleplayer", "Multiplayer", "Co-op", "Online Co-Op",
-        "Steam Cloud", "Full controller support", "Tracked Controller Support",
-        "PvP", "PvE", "Competitive", "Steam Achievements", "Steam Trading Cards",
-        "Steam Workshop", "Steam Leaderboards", "Remote Play Together",
-        "Remote Play on Phone", "Remote Play on Tablet", "Remote Play on TV",
-        "VR Only", "VR Supported", "VR", "Partial Controller Support",
-        "Great Soundtrack", "Soundtrack", "Violent", "Gore", "Family Sharing",
-        "Software", "Software Training", "Education", "Utilities", "Design & Illustration",
-        "Animation & Modeling", "Game Development", "Hentai", "Capitalism", "3D", "2D",
-        "Cinematic", "Lore-Rich", "Casual", "Atmospheric", "Story Rich", "Single-player",
-        "Action", "Adventure", "Action-Adventure", "FPS", "First-Person", "Third Person",
-        "Hero Shooter", "Team-Based", "Difficult", "Superhero", "Massively Multiplayer",
-        "MMO", "MMORPG", "Side Scroller", "Top-Down", "Third-Person Shooter"
-    )
-
     /**
      * Checks if a game has a valid library image on Steam's servers.
      */
     fun hasLibraryImage(appId: Int?): Boolean {
         if (appId == null) return false
         val urls = mutableListOf<String>()
-        if (HomeActivity.AlgoConfig.useLibrary2xFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900_2x.jpg")
-        if (HomeActivity.AlgoConfig.useLibrary1xFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900.jpg")
-        if (HomeActivity.AlgoConfig.useCapsuleFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/capsule_231x350.jpg")
+        if (AlgoConfig.useLibrary2xFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900_2x.jpg")
+        if (AlgoConfig.useLibrary1xFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900.jpg")
+        if (AlgoConfig.useCapsuleFallback) urls.add("https://cdn.akamai.steamstatic.com/steam/apps/$appId/capsule_231x350.jpg")
         
         if (urls.isEmpty()) return true // If no specific fallbacks are checked, assume okay or bypass
 
@@ -139,7 +121,7 @@ class SteamRepository(private val apiKey: String) {
                 val searchTerm = if (isNiche) "$genre+masterpiece" else genre.replace(" ", "+")
                 
                 // STRATEGY C: Use the AJAX JSON endpoint if enabled
-                val url = if (HomeActivity.AlgoConfig.useJsonEndpoint) {
+                val url = if (AlgoConfig.useJsonEndpoint) {
                     "https://store.steampowered.com/search/results/?term=$searchTerm&category1=998&sort_by=$sortBy&json=1"
                 } else {
                     "https://store.steampowered.com/search/?term=$searchTerm&category1=998&sort_by=$sortBy"
@@ -150,7 +132,7 @@ class SteamRepository(private val apiKey: String) {
                     .header("Referer", "https://store.steampowered.com/")
                     .timeout(5000)
 
-                val doc = if (HomeActivity.AlgoConfig.useJsonEndpoint) {
+                val doc = if (AlgoConfig.useJsonEndpoint) {
                     // Extract HTML from the JSON response
                     val response = connection.ignoreContentType(true).execute().body()
                     val html = JSONObject(response).optString("results_html")
@@ -311,7 +293,7 @@ class SteamRepository(private val apiKey: String) {
                             val details = response.body()?.get(appId.toString())
                             if (details?.success == true) {
                                 details.data?.genres?.mapNotNull { it.description }?.forEach { genre ->
-                                    if (tagBlacklist.none { it.equals(genre, ignoreCase = true) }) {
+                                    if (DataConfig.tagBlacklist.none { it.equals(genre, ignoreCase = true) }) {
                                         genreCounts[genre] = (genreCounts[genre] ?: 0) + 1
                                     }
                                 }
@@ -333,7 +315,7 @@ class SteamRepository(private val apiKey: String) {
                             Log.d("SteamDebug", "Processing tags for ${game.name ?: appId}: $tags")
                             
                             tags.forEach { tag ->
-                                if (tag.isNotEmpty() && tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {
+                                if (tag.isNotEmpty() && DataConfig.tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {
                                     // Tags contribute to the same frequency map as genres
                                     genreCounts[tag] = (genreCounts[tag] ?: 0) + 1
                                 }
@@ -376,7 +358,7 @@ class SteamRepository(private val apiKey: String) {
                             val details = response.body()?.get(appId.toString())
                             if (details?.success == true) {
                                 details.data?.genres?.mapNotNull { it.description }?.forEach { genre ->
-                                    if (tagBlacklist.none { it.equals(genre, ignoreCase = true) }) {
+                                    if (DataConfig.tagBlacklist.none { it.equals(genre, ignoreCase = true) }) {
                                         gameTags.add(genre)
                                     }
                                 }
@@ -394,7 +376,7 @@ class SteamRepository(private val apiKey: String) {
 
                             val tags = doc.select(".app_tag").map { it.text().trim() }
                             tags.forEach { tag ->
-                                if (tag.isNotEmpty() && tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {
+                                if (tag.isNotEmpty() && DataConfig.tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {
                                     gameTags.add(tag)
                                 }
                             }

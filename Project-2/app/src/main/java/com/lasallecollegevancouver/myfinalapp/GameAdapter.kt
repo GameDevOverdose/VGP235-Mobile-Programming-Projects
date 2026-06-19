@@ -82,19 +82,19 @@ class GameAdapter(
         if (game.appid != null && game.appid != 0) {
             val urls = mutableListOf<String>()
             
-            if (HomeActivity.AlgoConfig.useLibrary2xFallback) {
+            if (AlgoConfig.useLibrary2xFallback) {
                 urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900_2x.jpg")
             }
-            if (HomeActivity.AlgoConfig.useLibrary1xFallback) {
+            if (AlgoConfig.useLibrary1xFallback) {
                 urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/library_600x900.jpg")
             }
-            if (HomeActivity.AlgoConfig.useCapsuleFallback) {
+            if (AlgoConfig.useCapsuleFallback) {
                 urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/capsule_231x350.jpg")
             }
-            if (HomeActivity.AlgoConfig.useHeaderFallback) {
+            if (AlgoConfig.useHeaderFallback) {
                 urls.add("https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg")
             }
-            if (HomeActivity.AlgoConfig.useScrapedFallback && !game.fallbackImageUrl.isNullOrEmpty()) {
+            if (AlgoConfig.useScrapedFallback && !game.fallbackImageUrl.isNullOrEmpty()) {
                 urls.add(game.fallbackImageUrl!!)
             }
 
