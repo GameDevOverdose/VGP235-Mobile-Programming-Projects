@@ -26,6 +26,7 @@ object AlgoConfig {
 
     // Strategy A Flag (Consolidate 9 requests -> 3)
     const val useConsolidatedStrategy = true
+    const val showRealTimeDna = true
 }
 
 object UIConfig {

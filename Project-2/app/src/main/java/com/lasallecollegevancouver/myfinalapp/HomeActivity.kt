@@ -399,7 +399,49 @@ class HomeActivity : AppCompatActivity() {
                 categories.add(Category("Library", it))
             }
         }
-        findViewById<RecyclerView>(R.id.playerDataRv_id).adapter = CategoryAdapter(categories, data.topGenres)
+
+        val adapter = CategoryAdapter(categories, data.topGenres, onGameSelectionChanged = {
+            if (AlgoConfig.showRealTimeDna) {
+                updateRealTimeDna(data)
+            }
+        })
+        findViewById<RecyclerView>(R.id.playerDataRv_id).adapter = adapter
+    }
+
+    private fun updateRealTimeDna(data: FullUserData) {
+        val allGames = (data.ownedGames?.games ?: emptyList()) + (data.recentlyPlayed ?: emptyList())
+        val plusGames = allGames.filter { it.selectionState == 1 }.distinctBy { it.appid }
+        val minusGames = allGames.filter { it.selectionState == 2 }.distinctBy { it.appid }
+
+        if (plusGames.isEmpty() && minusGames.isEmpty()) {
+            val adapter = findViewById<RecyclerView>(R.id.playerDataRv_id).adapter as? CategoryAdapter
+            adapter?.let {
+                it.topGenres = data.topGenres
+                it.dnaSubtitle = "Based on your most played titles"
+                it.notifyItemChanged(it.itemCount - 1)
+            }
+            return
+        }
+
+        repository.fetchGenresForSelectedGames(plusGames + minusGames) { tagsMap ->
+            val plusTags = plusGames.flatMap { tagsMap[it.appid] ?: emptyList() }.toSet()
+            val minusTags = minusGames.flatMap { tagsMap[it.appid] ?: emptyList() }.toSet()
+
+            val initialDna = data.topGenres.take(6).shuffled().take(4).toMutableList()
+            val enhancedDna = (plusTags.take(8) + initialDna).distinct()
+            val finalDna = enhancedDna.filter { tag ->
+                minusTags.none { it.equals(tag, ignoreCase = true) }
+            }.take(AlgoConfig.maxGenresWithSelection)
+
+            runOnUiThread {
+                val adapter = findViewById<RecyclerView>(R.id.playerDataRv_id).adapter as? CategoryAdapter
+                adapter?.let {
+                    it.topGenres = finalDna
+                    it.dnaSubtitle = "Real-time Filter DNA"
+                    it.notifyItemChanged(it.itemCount - 1)
+                }
+            }
+        }
     }
 
     private fun updateUI(steamId: String) {

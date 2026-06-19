@@ -24,6 +24,7 @@
             android:fontFamily="@font/akatab" />
 
         <TextView
+            android:id="@+id/dnaSubtitle_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Based on your most played titles"

@@ -11,9 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 
 class CategoryAdapter(
     private val categories: List<Category>,
-    private val topGenres: List<String> = emptyList(),
+    var topGenres: List<String> = emptyList(),
+    var dnaSubtitle: String = "Based on your most played titles",
     private val isRecommendation: Boolean = false,
-    private val useGrid: Boolean = isRecommendation
+    private val useGrid: Boolean = isRecommendation,
+    private val onGameSelectionChanged: (Game) -> Unit = {}
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -28,6 +30,7 @@ class CategoryAdapter(
 
     class GenreStatsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val genreText: TextView = view.findViewById(R.id.genreText_id)
+        val subtitle: TextView = view.findViewById(R.id.dnaSubtitle_id)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -58,11 +61,17 @@ class CategoryAdapter(
                 holder.recycler.layoutManager =
                     LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
             }
-            holder.recycler.adapter = GameAdapter(category.games, isRecommendation = isRecommendation, useGrid = useGrid)
+            holder.recycler.adapter = GameAdapter(
+                category.games,
+                isRecommendation = isRecommendation,
+                useGrid = useGrid,
+                onSelectionChanged = onGameSelectionChanged
+            )
         } else if (holder is GenreStatsViewHolder) {
             val text = topGenres.mapIndexed { index, genre -> "${index + 1}. $genre" }
                 .joinToString("\n")
             holder.genreText.text = text
+            holder.subtitle.text = dnaSubtitle
         }
     }
 
