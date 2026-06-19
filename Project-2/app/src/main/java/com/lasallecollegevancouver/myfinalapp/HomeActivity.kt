@@ -217,9 +217,12 @@ class HomeActivity : AppCompatActivity() {
 
                 // Helper to pick a single game matching criteria
                 fun tryPickOne(pool: List<Game>, type: String, sMin: Int = 0, cMin: Int = 0, sMax: Int = 100, cMax: Int = Int.MAX_VALUE): Boolean {
+                    val effectiveSMin = if (AlgoConfig.strictQualityEnforcement) maxOf(sMin, AlgoConfig.minReviewScore) else sMin
+                    val effectiveCMin = if (AlgoConfig.strictQualityEnforcement) maxOf(cMin, AlgoConfig.minReviewCount) else cMin
+                    
                     val candidates = pool.filter { 
                         it.appid !in allSeenIds && it.appid !in failedImageIds &&
-                        it.reviewScore in sMin..sMax && it.reviewCount in cMin..cMax
+                        it.reviewScore in effectiveSMin..sMax && it.reviewCount in effectiveCMin..cMax
                     }.shuffled()
 
                     for (game in candidates) {
@@ -246,9 +249,12 @@ class HomeActivity : AppCompatActivity() {
 
                 // Helper to fill remaining slots with less restriction
                 fun fillRemaining(pool: List<Game>, type: String, sMin: Int = 0, cMin: Int = 0) {
+                    val effectiveSMin = if (AlgoConfig.strictQualityEnforcement) maxOf(sMin, AlgoConfig.minReviewScore) else sMin
+                    val effectiveCMin = if (AlgoConfig.strictQualityEnforcement) maxOf(cMin, AlgoConfig.minReviewCount) else cMin
+
                     val candidates = pool.filter { 
                         it.appid !in allSeenIds && it.appid !in failedImageIds &&
-                        it.reviewScore >= sMin && it.reviewCount >= cMin
+                        it.reviewScore >= effectiveSMin && it.reviewCount >= effectiveCMin
                     }.distinctBy { it.appid }.shuffled()
 
                     for (game in candidates) {
