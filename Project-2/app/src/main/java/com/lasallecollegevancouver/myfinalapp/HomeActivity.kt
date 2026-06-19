@@ -531,7 +531,16 @@ class HomeActivity : AppCompatActivity() {
                 recommendButton.visibility = View.VISIBLE
 
                 // Update Profile Info
-                findViewById<TextView>(R.id.nameTextView_id).text = "Name: ${data.player.personaname ?: "N/A"}"
+                val nameTextView = findViewById<TextView>(R.id.nameTextView_id)
+                nameTextView.text = "Name: ${data.player.personaname ?: "N/A"}"
+                if (UIConfig.truncatePlayerName) {
+                    nameTextView.maxLines = 1
+                    nameTextView.ellipsize = android.text.TextUtils.TruncateAt.END
+                } else {
+                    nameTextView.maxLines = Int.MAX_VALUE
+                    nameTextView.ellipsize = null
+                }
+
                 findViewById<TextView>(R.id.countryTextView_id).text = "Country: ${data.player.loccountrycode ?: "N/A"}"
                 findViewById<ImageView>(R.id.avatarImageView_id).load(data.player.avatarfull) {
                     crossfade(500)

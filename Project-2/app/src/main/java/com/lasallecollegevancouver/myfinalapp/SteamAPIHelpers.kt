@@ -315,9 +315,9 @@ class SteamRepository(private val apiKey: String) {
                             game.fallbackImageUrl = doc.select("meta[property=og:image]").attr("content")
                             
                             val tags = doc.select(".app_tag").map { it.text().trim() }
-                            
+
                             Log.d("SteamDebug", "Processing tags for ${game.name ?: appId}: $tags")
-                            
+
                             tags.forEach { tag ->
                                 if (tag.isNotEmpty() && DataConfig.tagBlacklist.none { it.equals(tag, ignoreCase = true) }) {
                                     // Tags contribute to the same frequency map as genres

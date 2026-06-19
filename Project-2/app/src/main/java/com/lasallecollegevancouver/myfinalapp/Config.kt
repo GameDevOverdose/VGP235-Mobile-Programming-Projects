@@ -34,6 +34,7 @@ object UIConfig {
     const val useGradient = true
     const val useShadows = true
     const val noiseIntensity = 0.15f // Dial this up or down (0.0 to 1.0) to fix banding
+    const val truncatePlayerName = true
 }
 
 object DataConfig {
