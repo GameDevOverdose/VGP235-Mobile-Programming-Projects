@@ -25,8 +25,27 @@ While hectic, the app still somehow came together towards the end, which even th
 - The details that the users input in the settings were meant to be displayed on the home page apart from that, the discover users' details would benefit from being labelled.
 - A nice to have, would be the match system hinting and displaying what factors led it to come to the conclusion that it did.
 
-
 and many more I imagine, but these were the primary ones.
+
+# Final 📄
+
+For the final project, we were offered two choices. The first, to create a simple app with the knowledge that we have gained throughout the course. The second? To create a more impressive app completely using AI. Having only a week to develop the app, and the prospect of reaching beyond what I already know sounded much better to me, so the second approach is what I chose.
+
+And what came of it is A Steam Game Recommendation app that reads your Steam profile, and allow you to filter games (or not) and get recommendations based off of those games.
+
+# Implementation
+
+- The first part of recommending a game is finding the player's taste and preferences. The way the algorithm currently is that it tries to find the most commonly occuring genres and game tags within all the games you've played or selected for, and makes a small list of the player's Gaming DNA. The genres are all found using Steam's API but since they tend to be too broad to be meaningful, the app scrapes the tags off of a game's steam page using it's AppID.
+
+- Once the app has stored that list, it then uses 3 random tags/genres and looks them up on the Steam's search. Using a variety of different identification methods to vary the results such as finding a cult classic, or a blockbuster, or a hidden gem, and slightly varying the number of the pick from the results found, the App then simply picks 3 games for the 3 selected genres.
+
+- The profile display, simply calls the Steam API and get's the player's information using their SteamID.
+
+# Learnings
+
+- The Leaky Bucket Problem: When developing the algorithm, a peculiar issue that I ran into was after clicking the recommend button 4-5 times, the recommendations just disappread and just wouldn't appear until the user's 17 click (or after waiting a minute or two). But soon after some diagnosis what I quickly realized was that the brickwall I was running into was Steam's bot detection. What solved it was desiging the algorithm to be more frugal when it comes to sending requests to the website, so where it had been previously doing it 9 times, for a single recommendation it now does it only 3 times, allowing the app to run a reasonably of time while the bucket refills.
+
+Basically sending 
 
 # Links 🔗
 
