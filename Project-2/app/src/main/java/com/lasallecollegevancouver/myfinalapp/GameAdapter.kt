@@ -69,7 +69,8 @@ class GameAdapter(
             
             if (game.reviewCount > 0) {
                 holder.reviews.visibility = View.VISIBLE
-                holder.reviews.text = "${game.reviewScore}% (${game.reviewCount / 1000}k reviews)"
+                val countText = if (game.reviewCount >= 1000) "${game.reviewCount / 1000}k" else "${game.reviewCount}"
+                holder.reviews.text = "${game.reviewScore}% ($countText reviews)"
             } else {
                 holder.reviews.visibility = View.GONE
             }

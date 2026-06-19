@@ -182,6 +182,7 @@ class HomeActivity : AppCompatActivity() {
         val data = currentUserData ?: return
         val recommendButton = findViewById<Button>(R.id.recommendGamesButton_id)
         val rootLayout = findViewById<ConstraintLayout>(R.id.root)
+        val noRecsText = findViewById<TextView>(R.id.noRecommendationsText_id)
 
         val transition = TransitionSet().apply {
             addTransition(Fade())
@@ -192,6 +193,7 @@ class HomeActivity : AppCompatActivity() {
         if (isShowingRecommendations) {
             isShowingRecommendations = false
             recommendButton.text = "Start Recommendation"
+            noRecsText.visibility = View.GONE
             showProfileCategories(data)
         } else {
             isShowingRecommendations = true
@@ -356,6 +358,14 @@ class HomeActivity : AppCompatActivity() {
             runOnUiThread {
                 progressBar.visibility = View.GONE
                 recyclerView.adapter = CategoryAdapter(recommendations, isRecommendation = true)
+                
+                if (recommendations.isEmpty()) {
+                    findViewById<TextView>(R.id.noRecommendationsText_id).visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                } else {
+                    findViewById<TextView>(R.id.noRecommendationsText_id).visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+                }
             }
         }
 
@@ -425,6 +435,8 @@ class HomeActivity : AppCompatActivity() {
 
     private fun showProfileCategories(data: FullUserData) {
         val categories = mutableListOf<Category>()
+        findViewById<TextView>(R.id.noRecommendationsText_id).visibility = View.GONE
+        findViewById<RecyclerView>(R.id.playerDataRv_id).visibility = View.VISIBLE
         data.ownedGames?.let { owned ->
             val mostPlayed = owned.games?.sortedByDescending { it.playtime_forever ?: 0 }?.take(10)
             if (!mostPlayed.isNullOrEmpty()) {

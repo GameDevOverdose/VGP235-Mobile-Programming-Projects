@@ -174,6 +174,8 @@ class SteamRepository(private val apiKey: String) {
                     val score = scoreMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
                     val count = countMatch?.groupValues?.get(1)?.replace(",", "")?.toIntOrNull() ?: 0
                     
+                    Log.d("SteamDebug", "Parsed game: $name (ID: $appId), Reviews: $count, Score: $score")
+
                     // Basic sanity check to avoid completely broken data
                     if (appId != null && name.isNotEmpty()) {
                         val game = Game(
