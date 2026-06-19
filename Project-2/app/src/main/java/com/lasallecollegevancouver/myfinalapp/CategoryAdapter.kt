@@ -15,7 +15,8 @@ class CategoryAdapter(
     var dnaSubtitle: String = "Based on your most played titles",
     private val isRecommendation: Boolean = false,
     private val useGrid: Boolean = isRecommendation,
-    private val onGameSelectionChanged: (Game) -> Unit = {}
+    private val onGameSelectionChanged: (Game) -> Unit = {},
+    private val onClearFilters: () -> Unit = {}
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -31,6 +32,7 @@ class CategoryAdapter(
     class GenreStatsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val genreText: TextView = view.findViewById(R.id.genreText_id)
         val subtitle: TextView = view.findViewById(R.id.dnaSubtitle_id)
+        val clearFiltersBtn: TextView = view.findViewById(R.id.clearFiltersBtn_id)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -72,8 +74,15 @@ class CategoryAdapter(
                 .joinToString("\n")
             holder.genreText.text = text
             holder.subtitle.text = dnaSubtitle
+
+            val hasSelections = categories.any { cat -> cat.games.any { it.selectionState != 0 } }
+            holder.clearFiltersBtn.visibility = if (hasSelections) View.VISIBLE else View.GONE
+            holder.clearFiltersBtn.setOnClickListener {
+                onClearFilters()
+            }
         }
     }
+
 
     override fun getItemCount() = if (topGenres.isNotEmpty()) categories.size + 1 else categories.size
 }

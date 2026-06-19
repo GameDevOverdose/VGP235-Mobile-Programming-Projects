@@ -410,6 +410,11 @@ class HomeActivity : AppCompatActivity() {
             if (AlgoConfig.showRealTimeDna) {
                 updateRealTimeDna(data)
             }
+        }, onClearFilters = {
+            data.ownedGames?.games?.forEach { it.selectionState = 0 }
+            data.recentlyPlayed?.forEach { it.selectionState = 0 }
+            updateRealTimeDna(data)
+            findViewById<RecyclerView>(R.id.playerDataRv_id).adapter?.notifyDataSetChanged()
         })
         findViewById<RecyclerView>(R.id.playerDataRv_id).adapter = adapter
     }

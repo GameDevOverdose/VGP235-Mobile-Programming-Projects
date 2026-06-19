@@ -118,13 +118,17 @@ class SteamRepository(private val apiKey: String) {
     ) {
         Thread {
             try {
-                val searchTerm = if (isNiche) "$genre+masterpiece" else genre.replace(" ", "+")
+                val tagId = DataConfig.tagIdMap[genre.lowercase()]
+                val searchTerm = if (isNiche) "masterpiece" else ""
                 
-                // STRATEGY C: Use the AJAX JSON endpoint if enabled
                 val url = if (AlgoConfig.useJsonEndpoint) {
-                    "https://store.steampowered.com/search/results/?term=$searchTerm&category1=998&sort_by=$sortBy&json=1"
+                    val base = "https://store.steampowered.com/search/results/?category1=998&sort_by=$sortBy&json=1"
+                    val withTag = if (tagId != null) "$base&tags=$tagId" else "$base&term=${genre.replace(" ", "+")}"
+                    if (searchTerm.isNotEmpty()) "$withTag&term=$searchTerm" else withTag
                 } else {
-                    "https://store.steampowered.com/search/?term=$searchTerm&category1=998&sort_by=$sortBy"
+                    val base = "https://store.steampowered.com/search/?category1=998&sort_by=$sortBy"
+                    val withTag = if (tagId != null) "$base&tags=$tagId" else "$base&term=${genre.replace(" ", "+")}"
+                    if (searchTerm.isNotEmpty()) "$withTag&term=$searchTerm" else withTag
                 }
                 
                 val connection = Jsoup.connect(url)

@@ -5,7 +5,7 @@ object AppConfig {
 }
 
 object AlgoConfig {
-    const val minReviewCount = 1000
+    const val minReviewCount = 2000
     const val minReviewScore = 70
     const val verifyImagesEnabled = true
     const val useLibrary2xFallback = false
@@ -36,6 +36,23 @@ object UIConfig {
 }
 
 object DataConfig {
+    val tagIdMap = mapOf(
+        "action" to "19",
+        "extraction shooter" to "364",
+        //"adventure" to "21",
+        //"rpg" to "122",
+        //"strategy" to "9",
+        //"simulation" to "597",
+        //"platformer" to "1625",
+        //"horror" to "1667",
+        //"survival" to "1662",
+        //"racing" to "699",
+        //"sports" to "701",
+        "space" to "1755",
+        "sci-fi" to "3942",
+        //"open world" to "16719"
+    )
+
     val adjacentTags = mapOf(
         "RPG" to listOf("Action RPG", "JRPG", "Open World RPG", "CRPG"),
         "Action" to listOf("Adventure", "Hack and Slash", "Shooter", "Platformer"),
@@ -49,7 +66,9 @@ object DataConfig {
         "Survival" to listOf("Open World Survival Craft", "Survival Horror", "Crafting", "Exploration"),
         "Puzzle" to listOf("Logic", "Minimalist", "First-Person Puzzle"),
         "Racing" to listOf("Automobile Sim", "Arcade Racer", "Sim Racing"),
-        "Sports" to listOf("Football", "Basketball", "Skating")
+        "Sports" to listOf("Football", "Basketball", "Skating"),
+        "Space" to listOf("Sci-fi", "Space Sim", "Exploration", "Atmospheric"),
+        "Cyberpunk" to listOf("Sci-fi", "Dystopian", "Stealth", "RPG")
     )
 
     val tagBlacklist = arrayOf(
