@@ -44,6 +44,14 @@ class HomeActivity : AppCompatActivity() {
         const val blockbusterReviewThreshold = 5000
         const val maxGenresNoSelection = 3
         const val maxGenresWithSelection = 3
+        
+        // Strategy B & C Flags
+        const val useSequentialRequests = true
+        const val requestJitterMs = 200L
+        const val useJsonEndpoint = false
+
+        // Strategy A Flag (Consolidate 9 requests -> 3)
+        const val useConsolidatedStrategy = true
     }
 
     // --- UI CONFIGURATION ---
@@ -239,7 +247,7 @@ class HomeActivity : AppCompatActivity() {
         val resultsPopularity = mutableMapOf<String, List<Game>>()
         val resultsDiscovery = mutableMapOf<String, List<Game>>()
         var completedCalls = 0
-        val totalExpectedCalls = selectedGenres.size * 3
+        val totalExpectedCalls = if (AlgoConfig.useConsolidatedStrategy) selectedGenres.size else selectedGenres.size * 3
 
         fun processCuratedList() {
             val allSeenIds = ownedAppIds.toMutableSet()
@@ -260,12 +268,13 @@ class HomeActivity : AppCompatActivity() {
                     }.shuffled()
 
                     for (game in candidates) {
+                        // REORDERED: Check "free" configurations first to avoid unnecessary network calls
                         val hasValidImage = !AlgoConfig.verifyImagesEnabled || 
+                                           AlgoConfig.useHeaderFallback || 
+                                           (AlgoConfig.useScrapedFallback && game.fallbackImageUrl != null) ||
                                            (AlgoConfig.useLibrary2xFallback && repository.hasLibraryImage(game.appid)) || 
                                            (AlgoConfig.useLibrary1xFallback && repository.hasLibraryImage(game.appid)) || 
-                                           (AlgoConfig.useCapsuleFallback && repository.hasLibraryImage(game.appid)) || 
-                                           AlgoConfig.useHeaderFallback || 
-                                           (AlgoConfig.useScrapedFallback && game.fallbackImageUrl != null)
+                                           (AlgoConfig.useCapsuleFallback && repository.hasLibraryImage(game.appid))
 
                         if (hasValidImage) {
                             game.appid?.let { allSeenIds.add(it) }
@@ -290,12 +299,13 @@ class HomeActivity : AppCompatActivity() {
                     for (game in candidates) {
                         if (curatedGames.size >= AlgoConfig.strategiesPerGenre) break
                         
+                        // REORDERED: Check "free" configurations first
                         val hasValidImage = !AlgoConfig.verifyImagesEnabled || 
+                                           AlgoConfig.useHeaderFallback || 
+                                           (AlgoConfig.useScrapedFallback && game.fallbackImageUrl != null) ||
                                            (AlgoConfig.useLibrary2xFallback && repository.hasLibraryImage(game.appid)) || 
                                            (AlgoConfig.useLibrary1xFallback && repository.hasLibraryImage(game.appid)) || 
-                                           (AlgoConfig.useCapsuleFallback && repository.hasLibraryImage(game.appid)) ||
-                                           AlgoConfig.useHeaderFallback || 
-                                           (AlgoConfig.useScrapedFallback && game.fallbackImageUrl != null)
+                                           (AlgoConfig.useCapsuleFallback && repository.hasLibraryImage(game.appid))
 
                         if (hasValidImage) {
                             game.appid?.let { allSeenIds.add(it) }
@@ -349,32 +359,67 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
+        val searchActions = mutableListOf<() -> Unit>()
         selectedGenres.forEach { genre ->
-            repository.searchGamesByGenre(genre, sortBy = "relevance") { games ->
-                synchronized(resultsRelevance) {
-                    resultsRelevance[genre] = games
-                    completedCalls++
-                    if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+            if (AlgoConfig.useConsolidatedStrategy) {
+                // STRATEGY A: Single call per genre, map to all pools
+                searchActions.add {
+                    repository.searchGamesByGenre(genre, sortBy = "Reviews_DESC") { games ->
+                        synchronized(resultsRelevance) {
+                            resultsRelevance[genre] = games
+                            resultsPopularity[genre] = games
+                            resultsDiscovery[genre] = games
+                            completedCalls++
+                            if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+                        }
+                    }
+                }
+            } else {
+                searchActions.add {
+                    repository.searchGamesByGenre(genre, sortBy = "relevance") { games ->
+                        synchronized(resultsRelevance) {
+                            resultsRelevance[genre] = games
+                            completedCalls++
+                            if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+                        }
+                    }
+                }
+                searchActions.add {
+                    repository.searchGamesByGenre(genre, sortBy = "Reviews_DESC") { games ->
+                        synchronized(resultsRelevance) {
+                            resultsPopularity[genre] = games
+                            completedCalls++
+                            if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+                        }
+                    }
+                }
+
+                // Discovery search using adjacent tags
+                val adjacent = adjacentTags[genre] ?: emptyList()
+                val discoveryTag = adjacent.shuffled().firstOrNull() ?: genre
+                searchActions.add {
+                    repository.searchGamesByGenre(discoveryTag, sortBy = "relevance") { games ->
+                        synchronized(resultsRelevance) {
+                            resultsDiscovery[genre] = games
+                            completedCalls++
+                            if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+                        }
+                    }
                 }
             }
-            repository.searchGamesByGenre(genre, sortBy = "Reviews_DESC") { games ->
-                synchronized(resultsRelevance) {
-                    resultsPopularity[genre] = games
-                    completedCalls++
-                    if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
+        }
+
+        if (AlgoConfig.useSequentialRequests) {
+            Thread {
+                searchActions.forEachIndexed { index, action ->
+                    action()
+                    if (index < searchActions.size - 1) {
+                        Thread.sleep(AlgoConfig.requestJitterMs)
+                    }
                 }
-            }
-            
-            // Discovery search using adjacent tags
-            val adjacent = adjacentTags[genre] ?: emptyList()
-            val discoveryTag = adjacent.shuffled().firstOrNull() ?: genre
-            repository.searchGamesByGenre(discoveryTag, sortBy = "relevance") { games ->
-                synchronized(resultsRelevance) {
-                    resultsDiscovery[genre] = games
-                    completedCalls++
-                    if (completedCalls == totalExpectedCalls) Thread { processCuratedList() }.start()
-                }
-            }
+            }.start()
+        } else {
+            searchActions.forEach { it() }
         }
     }
 

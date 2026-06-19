@@ -3,6 +3,7 @@ package com.lasallecollegevancouver.myfinalapp
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import org.json.JSONObject
 import org.jsoup.Jsoup
 import retrofit2.Call
 import retrofit2.Callback
@@ -108,10 +109,12 @@ class SteamRepository(private val apiKey: String) {
         return try {
             for (url in urls) {
                 val response = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("Referer", "https://store.steampowered.com/")
                     .ignoreContentType(true)
                     .ignoreHttpErrors(true)
                     .method(org.jsoup.Connection.Method.HEAD)
-                    .timeout(2000)
+                    .timeout(3000)
                     .execute()
                 if (response.statusCode() == 200) return true
             }
@@ -134,9 +137,28 @@ class SteamRepository(private val apiKey: String) {
         Thread {
             try {
                 val searchTerm = if (isNiche) "$genre+masterpiece" else genre.replace(" ", "+")
-                val url = "https://store.steampowered.com/search/?term=$searchTerm&category1=998&sort_by=$sortBy"
                 
-                val doc = Jsoup.connect(url).get()
+                // STRATEGY C: Use the AJAX JSON endpoint if enabled
+                val url = if (HomeActivity.AlgoConfig.useJsonEndpoint) {
+                    "https://store.steampowered.com/search/results/?term=$searchTerm&category1=998&sort_by=$sortBy&json=1"
+                } else {
+                    "https://store.steampowered.com/search/?term=$searchTerm&category1=998&sort_by=$sortBy"
+                }
+                
+                val connection = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("Referer", "https://store.steampowered.com/")
+                    .timeout(5000)
+
+                val doc = if (HomeActivity.AlgoConfig.useJsonEndpoint) {
+                    // Extract HTML from the JSON response
+                    val response = connection.ignoreContentType(true).execute().body()
+                    val html = JSONObject(response).optString("results_html")
+                    Jsoup.parseBodyFragment(html)
+                } else {
+                    connection.get()
+                }
+
                 val searchResults = doc.select(".search_result_row")
                 
                 val games = searchResults.mapNotNull { element ->
@@ -296,6 +318,8 @@ class SteamRepository(private val apiKey: String) {
                             // 2. Scrape Store Tags with Age-Gate Bypass
                             val url = "https://store.steampowered.com/app/$appId"
                             val doc = Jsoup.connect(url)
+                                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                                .header("Referer", "https://store.steampowered.com/")
                                 .cookie("birthtime", "283993201") // Bypass age verification
                                 .get()
                             
@@ -358,6 +382,8 @@ class SteamRepository(private val apiKey: String) {
 
                             val url = "https://store.steampowered.com/app/$appId"
                             val doc = Jsoup.connect(url)
+                                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                                .header("Referer", "https://store.steampowered.com/")
                                 .cookie("birthtime", "283993201")
                                 .get()
                             
