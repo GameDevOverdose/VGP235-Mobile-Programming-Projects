@@ -33,6 +33,7 @@ object AlgoConfig {
 object UIConfig {
     const val useGradient = true
     const val useShadows = true
+    const val noiseIntensity = 0.15f // Dial this up or down (0.0 to 1.0) to fix banding
 }
 
 object DataConfig {
@@ -45,11 +46,12 @@ object DataConfig {
         //"simulation" to "597",
         //"platformer" to "1625",
         //"horror" to "1667",
+        //"psychological horror" to "16480",
         //"survival" to "1662",
         //"racing" to "699",
         //"sports" to "701",
         "space" to "1755",
-        "sci-fi" to "3942",
+        //"sci-fi" to "3942",
         //"open world" to "16719"
     )
 

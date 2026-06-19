@@ -1,8 +1,15 @@
 package com.lasallecollegevancouver.myfinalapp
 
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import java.util.Random
 import android.transition.Fade
 import android.transition.Transition
 import android.transition.TransitionManager
@@ -85,12 +92,45 @@ class HomeActivity : AppCompatActivity() {
 
     private fun applyUIConfig(root: View, searchBar: View) {
         if (!UIConfig.useGradient) {
-            root.setBackgroundColor(android.graphics.Color.parseColor("#292e37"))
+            root.setBackgroundColor(Color.parseColor("#292e37"))
+        } else {
+            (root.background as? GradientDrawable)?.setDither(true)
         }
+
+        applyNoiseOverlay(root)
         
         if (!UIConfig.useShadows) {
             (searchBar as? com.google.android.material.card.MaterialCardView)?.cardElevation = 0f
             findViewById<com.google.android.material.card.MaterialCardView>(R.id.playerHeaderCard_id).cardElevation = 0f
+        }
+    }
+
+    private fun applyNoiseOverlay(root: View) {
+        val intensity = UIConfig.noiseIntensity
+        if (intensity <= 0f) return
+
+        val size = 256
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val random = Random()
+        for (x in 0 until size) {
+            for (y in 0 until size) {
+                val noiseValue = random.nextInt(256)
+                // Subtle white/black noise based on random value and intensity
+                val color = if (random.nextBoolean()) Color.WHITE else Color.BLACK
+                val alpha = (noiseValue * intensity * 0.3f).toInt().coerceIn(0, 255)
+                bitmap.setPixel(x, y, Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color)))
+            }
+        }
+
+        val noiseDrawable = BitmapDrawable(resources, bitmap).apply {
+            setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        }
+
+        val currentBg = root.background
+        if (currentBg != null) {
+            root.background = LayerDrawable(arrayOf(currentBg, noiseDrawable))
+        } else {
+            root.background = noiseDrawable
         }
     }
 
