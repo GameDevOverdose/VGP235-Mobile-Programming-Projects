@@ -189,18 +189,28 @@ class SteamRepository(private val apiKey: String) {
 
     /**
      * Orchestrates all three API calls and returns the combined data.
-     * It first attempts to resolve the input if it's a vanity URL.
+     * It first attempts to resolve the input if it's a vanity URL or full link.
      */
     fun loadFullUserData(input: String, onResult: (FullUserData) -> Unit) {
+        var cleanInput = input.trim().removeSuffix("/")
+        
+        // Handle full URLs
+        if (cleanInput.contains("steamcommunity.com/id/")) {
+            cleanInput = cleanInput.substringAfter("steamcommunity.com/id/")
+        } else if (cleanInput.contains("steamcommunity.com/profiles/")) {
+            cleanInput = cleanInput.substringAfter("steamcommunity.com/profiles/")
+        }
+
         // If it looks like a 17-digit SteamID64, use it directly
-        if (input.length == 17 && input.all { it.isDigit() }) {
-            fetchData(input, onResult)
+        if (cleanInput.length == 17 && cleanInput.all { it.isDigit() }) {
+            fetchData(cleanInput, onResult)
         } else {
             // Otherwise, try to resolve it as a vanity URL
-            RetrofitClient.instance.resolveVanityURL(apiKey, input).enqueue(object : Callback<VanityURLResponse> {
+            RetrofitClient.instance.resolveVanityURL(apiKey, cleanInput).enqueue(object : Callback<VanityURLResponse> {
                 override fun onResponse(call: Call<VanityURLResponse>, response: Response<VanityURLResponse>) {
-                    val resolvedId = response.body()?.response?.steamid
-                    if (resolvedId != null) {
+                    val body = response.body()
+                    val resolvedId = body?.response?.steamid
+                    if (body?.response?.success == 1 && resolvedId != null) {
                         fetchData(resolvedId, onResult)
                     } else {
                         onResult(FullUserData(null, null, null))

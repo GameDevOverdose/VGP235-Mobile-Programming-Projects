@@ -1,0 +1,22 @@
+- Steam Recommendations App
+	- Connects to your steam profile
+	- Parses your reviews, preferences, play hours etc.
+	- Recommends games based on perceived preferences
+
+- Boutique Travel App
+	- Has a Postcard style UI, crafty, handmade feel
+	- Plans a trip out for you
+	- Recommends places that are less visited
+	- Homestays, Local food, offbeat activities
+
+- An Art Gallery App
+	- An art discovery app
+	- Recommends niche/new painters, paintings, daily
+	- An AI chatbot to discuss the work's story, themes, intentions
+	- Affiliated links to high quality prints which if bought give us commission
+
+- An architecture / decor App:
+	- Upload photos and describe your taste in architecture
+	- AI image generation spits out an image of the final 'look'
+	- An Ikea based buying system that links to actual pieces the AI's referencing
+		- Paint, lamps, lights, furniture

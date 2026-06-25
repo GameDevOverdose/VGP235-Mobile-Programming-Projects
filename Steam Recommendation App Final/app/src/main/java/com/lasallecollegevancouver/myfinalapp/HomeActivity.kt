@@ -17,6 +17,7 @@ import android.transition.TransitionSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -54,6 +55,19 @@ class HomeActivity : AppCompatActivity() {
             steamIdInput.text.clear()
         }
 
+        steamIdInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                val steamId = steamIdInput.text.toString().trim()
+                if (steamId.isNotEmpty()) {
+                    hideKeyboard()
+                    updateUI(steamId)
+                }
+                true
+            } else {
+                false
+            }
+        }
+
         steamIdInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -68,10 +82,10 @@ class HomeActivity : AppCompatActivity() {
                     animateSearchBarToCenter(rootLayout, searchBarCard)
                 }
 
-                if (steamId.length == 17) {
+                if (steamId.length == 17 && steamId.all { it.isDigit() }) {
                     hideKeyboard()
                     updateUI(steamId)
-                } else {
+                } else if (steamId.isEmpty()) {
                     findViewById<View>(R.id.playerHeaderCard_id).visibility = View.GONE
                     findViewById<RecyclerView>(R.id.playerDataRv_id).visibility = View.GONE
                     findViewById<Button>(R.id.recommendGamesButton_id).visibility = View.GONE
